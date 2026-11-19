@@ -1,0 +1,714 @@
+<title>Fire Stick Home Mockups</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a 16:9 "TV" stage sized with container units (1cqw = 1% of TV width), three switchable home screens, remote d-pad below. Single dark look on purpose: it's a TV. */
+:root {
+  color-scheme: dark;
+  --page: #0a0c10;
+  --page-fg: #d9dde6;
+  --muted: #8a93a6;
+  --line: #1e2431;
+  --bezel: #050608;
+
+  --zen-bg: #0b1211;
+  --zen-fg: #ece7dc;
+  --zen-dim: #9aa39c;
+  --zen-acc: #9fc7b0;
+
+  --cmd-bg: #0d1017;
+  --cmd-panel: #151a25;
+  --cmd-panel-2: #1b2130;
+  --cmd-fg: #e7eaf1;
+  --cmd-dim: #8f98ab;
+  --cmd-acc: #ffb547;
+
+  --ok: #5fd39a;
+  --live: #ff5a5f;
+  --warn: #ffcc66;
+
+  --f-display: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --f-ui: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+[hidden] { display: none !important; }
+html, body { background: var(--page); color: var(--page-fg); }
+body {
+  font-family: var(--f-ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* ---------- page chrome ---------- */
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.bar h1 { font-family: var(--f-ui); font-weight: 700; font-size: 1.25rem; margin: 0; letter-spacing: -0.01em; }
+.bar h1 span { color: var(--muted); font-weight: 400; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab {
+  font: 500 0.9rem var(--f-ui); color: var(--muted); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--page); background: var(--page-fg); border-color: var(--page-fg); }
+.tab:focus-visible { outline: 2px solid var(--cmd-acc); outline-offset: 2px; }
+.tab kbd { font-family: var(--f-mono); font-size: 0.75rem; opacity: 0.6; margin-right: 6px; }
+
+/* ---------- TV ---------- */
+.tv-shell { background: var(--bezel); border-radius: 14px; padding: 10px; box-shadow: 0 30px 80px -30px #000; }
+.tv {
+  container-type: inline-size; position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 100%;
+  overflow: hidden; border-radius: 6px; background: #000;
+}
+.screen { position: absolute; inset: 0; overflow: hidden; }
+.ambient { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.tv button:focus { outline: none; }
+
+/* App tiles (shared) */
+.app { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.8cqw; }
+.app .tile {
+  width: var(--tile, 7.2cqw); aspect-ratio: 1; border-radius: 1.6cqw; display: grid; place-items: center;
+  background: var(--brand); color: #fff; font: 700 calc(var(--tile, 7.2cqw) * 0.32) var(--f-ui); letter-spacing: -0.03em;
+  box-shadow: 0 0.6cqw 1.6cqw -0.8cqw #000a; transition: transform .18s ease, box-shadow .18s ease;
+}
+.app .tile svg { width: 42%; height: 42%; }
+.app .tile.small-mark { font-size: calc(var(--tile, 7.2cqw) * 0.22); }
+.app .name { font: 400 1.05cqw var(--f-ui); opacity: 0; transform: translateY(-0.3cqw); transition: opacity .18s, transform .18s; white-space: nowrap; }
+.app:focus .tile, .app:hover .tile { transform: scale(1.14); box-shadow: 0 0 0 0.25cqw var(--ring, #fff), 0 1.2cqw 3cqw -0.6cqw #000; }
+.app:focus .name, .app:hover .name { opacity: 1; transform: none; }
+.app.more .tile { background: #ffffff14; color: var(--ring, #fff); }
+.dots { display: flex; gap: 0.5cqw; } .dots i { width: 0.7cqw; height: 0.7cqw; border-radius: 50%; background: currentColor; }
+
+/* ---------- 1. ZEN ---------- */
+.zen { background: var(--zen-bg); color: var(--zen-fg); --ring: var(--zen-fg); }
+.zen-top { position: absolute; top: 3cqw; left: 4.5cqw; right: 4.5cqw; display: flex; justify-content: space-between; align-items: center; font: 300 1.3cqw var(--f-display); color: var(--zen-dim); }
+.icon-btn { width: 3.4cqw; height: 3.4cqw; border-radius: 50%; display: grid; place-items: center; color: var(--zen-dim); transition: background .15s, color .15s; }
+.icon-btn svg { width: 55%; height: 55%; }
+.icon-btn:focus, .icon-btn:hover { background: #ffffff1f; color: var(--zen-fg); box-shadow: 0 0 0 0.2cqw var(--ring); }
+.clock-block { position: absolute; left: 4.5cqw; top: 11cqw; }
+.time { font: 200 17cqw/0.9 var(--f-display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.time small { font-size: 0.18em; font-weight: 300; letter-spacing: 0.02em; margin-left: 0.4em; color: var(--zen-dim); }
+.date { font: 300 2.1cqw var(--f-display); color: var(--zen-dim); margin-top: 1.2cqw; letter-spacing: 0.01em; }
+.zen-apps { position: absolute; left: 4.5cqw; right: 4.5cqw; bottom: 4.2cqw; display: flex; gap: 2.6cqw; align-items: flex-start; }
+
+/* ---------- 2. COMMAND CENTRE ---------- */
+.cmd { background: var(--cmd-bg); color: var(--cmd-fg); --ring: var(--cmd-acc); padding: 2.2cqw 2.6cqw; display: grid; grid-template-rows: auto 1fr 14.4cqw; gap: 1.2cqw; }
+.cmd-top { display: flex; justify-content: space-between; align-items: center; }
+.cmd-top h2 { margin: 0; font: 500 1.9cqw var(--f-ui); letter-spacing: -0.01em; }
+.cmd-top h2 span { color: var(--cmd-dim); font-weight: 400; }
+.status { display: flex; gap: 1.6cqw; align-items: center; font: 400 1.1cqw var(--f-mono); color: var(--cmd-dim); }
+.status b { color: var(--cmd-fg); font-weight: 500; }
+.status svg { width: 1.4cqw; height: 1.4cqw; vertical-align: -0.25cqw; margin-right: 0.4cqw; }
+.cmd-mid { display: grid; grid-template-columns: 3.6fr 5fr 3.4fr; gap: 1.2cqw; min-height: 0; }
+.cmd-bot { display: grid; grid-template-columns: 8fr 3.4fr; gap: 1.2cqw; min-height: 0; }
+.panel { background: var(--cmd-panel); border-radius: 1.2cqw; padding: 1.4cqw 1.6cqw; display: flex; flex-direction: column; gap: 0.9cqw; min-width: 0; min-height: 0; }
+.panel h3 { margin: 0; font: 500 0.95cqw var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; color: var(--cmd-dim); display: flex; justify-content: space-between; align-items: center; }
+.panel h3 em { font-style: normal; letter-spacing: 0.04em; text-transform: none; font-family: var(--f-mono); opacity: .7; }
+.focusable { border-radius: 0.8cqw; transition: background .15s, box-shadow .15s; }
+.focusable:focus, .focusable:hover { background: var(--cmd-panel-2); box-shadow: 0 0 0 0.22cqw var(--ring); }
+
+.wx-now { display: flex; align-items: center; gap: 1.2cqw; text-align: left; padding: 0.4cqw; margin: -0.4cqw; }
+.wx-now svg { width: 5.4cqw; height: 5.4cqw; color: var(--warn); flex: none; }
+.wx-now .t { font: 300 5cqw/1 var(--f-display); letter-spacing: -0.03em; }
+.wx-now .d { font: 400 1.1cqw var(--f-ui); color: var(--cmd-dim); }
+.wx-days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6cqw; margin-top: auto; }
+.wx-days div { background: var(--cmd-panel-2); border-radius: 0.8cqw; padding: 0.7cqw 0; text-align: center; font: 400 0.95cqw var(--f-mono); color: var(--cmd-dim); display: flex; flex-direction: column; gap: 0.3cqw; }
+.wx-days b { color: var(--cmd-fg); font: 500 1.3cqw var(--f-ui); }
+
+.live-wrap { display: grid; grid-template-columns: 1fr; gap: 0.9cqw; min-height: 0; flex: 1; }
+.preview { position: relative; border-radius: 0.9cqw; overflow: hidden; min-height: 0; aspect-ratio: auto; display: block; text-align: left; }
+.preview .feed { position: absolute; inset: 0; background: linear-gradient(120deg, #1f5a3a, #2f7a4a 40%, #175034 70%, #24603f); background-size: 300% 300%; animation: feed 9s ease-in-out infinite; }
+.preview .feed::after { content: ""; position: absolute; left: 0; right: 0; top: 55%; height: 0.2cqw; background: #ffffff40; }
+.preview .feed::before { content: ""; position: absolute; left: 46%; top: 30%; width: 8%; aspect-ratio: 1; border: 0.2cqw solid #ffffff50; border-radius: 50%; }
+@keyframes feed { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.preview .meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 0.9cqw 1.1cqw; background: linear-gradient(transparent, #000c); display: flex; flex-direction: column; gap: 0.4cqw; }
+.preview .meta b { font: 500 1.3cqw var(--f-ui); }
+.preview .meta span { font: 400 0.95cqw var(--f-mono); color: #cfd5e0; }
+.progress { height: 0.35cqw; background: #ffffff30; border-radius: 1cqw; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 62%; background: var(--cmd-acc); }
+.badge { position: absolute; top: 0.9cqw; left: 0.9cqw; font: 500 0.85cqw var(--f-mono); letter-spacing: 0.08em; background: var(--live); color: #fff; padding: 0.25cqw 0.6cqw; border-radius: 0.4cqw; }
+.preview:focus, .preview:hover { box-shadow: 0 0 0 0.22cqw var(--ring); }
+.chips { display: flex; gap: 0.7cqw; }
+.chip { flex: 1; min-width: 0; text-align: left; background: var(--cmd-panel-2); border-radius: 0.8cqw; padding: 0.6cqw 0.9cqw; display: flex; flex-direction: column; gap: 0.15cqw; }
+.chip b { font: 500 1.05cqw var(--f-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip span { font: 400 0.85cqw var(--f-mono); color: var(--cmd-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.scores { display: flex; flex-direction: column; gap: 0.6cqw; }
+.score { display: grid; grid-template-columns: 1fr auto; gap: 0.2cqw 0.8cqw; text-align: left; padding: 0.6cqw 0.8cqw; background: var(--cmd-panel-2); }
+.score .comp { grid-column: 1 / -1; font: 400 0.8cqw var(--f-mono); color: var(--cmd-dim); letter-spacing: 0.04em; }
+.score .teams { font: 500 1.05cqw var(--f-ui); }
+.score .res { font: 500 1.05cqw var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.pill { font: 500 0.75cqw var(--f-mono); letter-spacing: 0.06em; padding: 0.15cqw 0.5cqw; border-radius: 0.4cqw; justify-self: end; }
+.pill.live { background: #ff5a5f26; color: var(--live); }
+.pill.ft { background: #ffffff14; color: var(--cmd-dim); }
+.pill.soon { background: #ffb54726; color: var(--cmd-acc); }
+.sample { font: 400 0.75cqw var(--f-mono); color: var(--cmd-dim); opacity: .7; margin-top: auto; }
+
+.apps-strip { display: flex; gap: 1.5cqw; align-items: flex-start; padding-top: 0.4cqw; --tile: 6cqw; --ring: var(--cmd-acc); }
+.apps-strip .app .name { opacity: 1; transform: none; color: var(--cmd-dim); font-size: 0.95cqw; }
+.apps-strip .app:focus .name { color: var(--cmd-fg); }
+.apps-strip .app:focus .tile, .apps-strip .app:hover .tile { transform: scale(1.08); }
+
+.sys { display: flex; flex-direction: column; gap: 0.5cqw; }
+.sys-row { display: flex; justify-content: space-between; align-items: center; gap: 1cqw; padding: 0.5cqw 0.7cqw; font: 400 1cqw var(--f-ui); text-align: left; }
+.sys-row span { color: var(--cmd-dim); }
+.sys-row b { font: 500 0.95cqw var(--f-mono); }
+.sys-row b.ok { color: var(--ok); }
+.meter { height: 0.45cqw; border-radius: 1cqw; background: var(--cmd-panel-2); overflow: hidden; margin: 0 0.7cqw; }
+.meter i { display: block; height: 100%; width: 64%; background: linear-gradient(90deg, var(--ok), var(--cmd-acc)); }
+
+/* ---------- 3. COMBINED ---------- */
+.combo { --acc: #ffb547; background: var(--zen-bg); color: var(--zen-fg); --ring: var(--acc); }
+.combo .clock-block { transition: transform .45s cubic-bezier(.2,.8,.2,1); transform-origin: top left; }
+.combo.open .clock-block { transform: translateY(-7.4cqw) scale(0.5); }
+.combo .zen-apps { transition: opacity .3s, transform .45s cubic-bezier(.2,.8,.2,1); bottom: 6.4cqw; }
+.combo.open .zen-apps { transform: translateY(-26cqw); }
+.glance { display: flex; gap: 1cqw; margin-top: 2cqw; flex-wrap: wrap; transition: opacity .25s; }
+.combo.open .glance { opacity: 0; pointer-events: none; }
+.combo.no-glance .glance { display: none; }
+.g-chip { display: flex; align-items: center; gap: 0.7cqw; font: 400 1.25cqw var(--f-ui); color: var(--zen-fg); background: #ffffff10; border-radius: 999px; padding: 0.7cqw 1.3cqw; transition: background .15s, box-shadow .15s; }
+.g-chip:focus, .g-chip:hover { background: #ffffff22; box-shadow: 0 0 0 0.2cqw var(--acc); }
+.g-chip .dot { width: 0.7cqw; height: 0.7cqw; border-radius: 50%; background: var(--live); animation: pulse 1.6s ease-in-out infinite; }
+.g-chip .mono { font-family: var(--f-mono); font-size: 1.1cqw; color: var(--zen-dim); }
+@keyframes pulse { 50% { opacity: .35; } }
+.handle { position: absolute; left: 50%; bottom: 1.6cqw; transform: translateX(-50%); font: 400 1cqw var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--zen-dim); display: flex; align-items: center; gap: 0.6cqw; transition: opacity .2s; }
+.handle svg { width: 1.2cqw; height: 1.2cqw; animation: nudge 2s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: translateY(0.3cqw); } }
+.combo.open .handle { opacity: 0; }
+
+.drawer {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 32cqw; padding: 2cqw 4.5cqw 2.4cqw;
+  background: linear-gradient(#0e1416ee, #0b1012f8); backdrop-filter: blur(1.2cqw);
+  border-top: 1px solid #ffffff14; transform: translateY(101%); transition: transform .45s cubic-bezier(.2,.8,.2,1);
+  display: grid; grid-template-columns: 5fr 3.4fr 3fr 3fr; gap: 1.2cqw;
+  --cmd-panel: #ffffff0b; --cmd-panel-2: #ffffff12; --ring: var(--acc); --cmd-acc: var(--acc);
+}
+.combo.open .drawer { transform: none; }
+.drawer .panel { padding: 1.2cqw 1.3cqw; }
+.drawer .preview { flex: 1; }
+
+.sheet {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 31cqw; padding: 3cqw 2.6cqw; background: #0d1314f5;
+  border-left: 1px solid #ffffff14; transform: translateX(101%); transition: transform .35s cubic-bezier(.2,.8,.2,1);
+  display: flex; flex-direction: column; gap: 1.8cqw; z-index: 3;
+}
+.sheet.open { transform: none; }
+.sheet h3 { margin: 0; font: 300 2.4cqw var(--f-display); }
+.sheet p { margin: -1cqw 0 0; font: 400 1cqw var(--f-ui); color: var(--zen-dim); }
+.opt { display: flex; flex-direction: column; gap: 0.7cqw; }
+.opt > span { font: 500 0.9cqw var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--zen-dim); }
+.seg { display: flex; gap: 0.6cqw; flex-wrap: wrap; }
+.seg button { font: 400 1.1cqw var(--f-ui); padding: 0.6cqw 1.1cqw; border-radius: 999px; background: #ffffff10; color: var(--zen-fg); display: flex; align-items: center; gap: 0.6cqw; }
+.seg button[aria-pressed="true"] { background: var(--zen-fg); color: var(--zen-bg); }
+.seg button:focus, .seg button:hover { box-shadow: 0 0 0 0.2cqw var(--acc); }
+.swatch { width: 1.2cqw; height: 1.2cqw; border-radius: 50%; background: var(--sw); }
+
+/* All-apps overlay (shared by Zen + Combined) */
+.allapps { position: absolute; inset: 0; background: #070a0bf2; backdrop-filter: blur(1cqw); padding: 4cqw 6cqw; display: flex; flex-direction: column; gap: 2cqw; z-index: 4; color: var(--zen-fg); --ring: var(--zen-fg); }
+.allapps h3 { margin: 0; font: 300 2.6cqw var(--f-display); display: flex; justify-content: space-between; align-items: baseline; }
+.allapps h3 span { font: 400 1cqw var(--f-mono); color: var(--zen-dim); }
+.grid-apps { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2.2cqw 1cqw; --tile: 6.4cqw; }
+.grid-apps .app .name { opacity: .75; transform: none; }
+.hidden-row { display: flex; gap: 1.6cqw; align-items: center; --tile: 4cqw; }
+.hidden-row .label { font: 500 0.9cqw var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--zen-dim); margin-right: 1cqw; }
+.hidden-row .app .tile { filter: grayscale(1); opacity: .45; }
+.hidden-row .app .name { opacity: .6; transform: none; font-size: 0.9cqw; }
+
+.toast { position: absolute; left: 50%; top: 2.6cqw; transform: translate(-50%, -6cqw); background: #f3f1ec; color: #111; font: 500 1.2cqw var(--f-ui); padding: 0.9cqw 1.8cqw; border-radius: 999px; transition: transform .3s cubic-bezier(.2,.8,.2,1); z-index: 9; white-space: nowrap; max-width: 90%; overflow: hidden; text-overflow: ellipsis; }
+.toast.show { transform: translate(-50%, 0); }
+
+/* ---------- below the TV ---------- */
+.under { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; }
+.about { min-width: 0; }
+.about h2 { font: 700 1.1rem var(--f-ui); margin: 0 0 6px; }
+.about p { margin: 0 0 10px; line-height: 1.55; color: var(--page-fg); max-width: 68ch; }
+.about ul { margin: 0; padding-left: 1.1em; line-height: 1.6; color: var(--muted); max-width: 68ch; }
+.about li b { color: var(--page-fg); font-weight: 500; }
+.keys { font: 400 0.8rem var(--f-mono); color: var(--muted); margin-top: 12px; }
+.keys kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; color: var(--page-fg); }
+
+.remote { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px) 40px; gap: 6px; background: #12151c; padding: 14px; border-radius: 28px; border: 1px solid var(--line); }
+.remote button { background: #1c2130; border-radius: 12px; color: var(--page-fg); display: grid; place-items: center; }
+.remote button:active { background: #2a3147; }
+.remote button:focus-visible { outline: 2px solid var(--cmd-acc); }
+.remote svg { width: 18px; height: 18px; }
+.remote .ok { border-radius: 50%; background: #262c3d; font: 600 0.8rem var(--f-ui); }
+.remote .back { grid-column: 1 / 4; border-radius: 999px; font: 500 0.8rem var(--f-ui); }
+.r-up { grid-column: 2; grid-row: 1; } .r-left { grid-column: 1; grid-row: 2; } .r-ok { grid-column: 2; grid-row: 2; }
+.r-right { grid-column: 3; grid-row: 2; } .r-down { grid-column: 2; grid-row: 3; } .back { grid-row: 4; }
+
+@media (max-width: 720px) {
+  .under { grid-template-columns: 1fr; }
+  .remote { justify-self: center; }
+  .tv-shell { padding: 5px; border-radius: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0s !important; }
+}
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <h1>Fire Stick Home <span>· 3 mockups</span></h1>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-go="zen" aria-selected="true"><kbd>1</kbd>Minimal Zen</button>
+      <button class="tab" role="tab" data-go="command" aria-selected="false"><kbd>2</kbd>Command Centre</button>
+      <button class="tab" role="tab" data-go="combined" aria-selected="false"><kbd>3</kbd>Combined</button>
+    </div>
+  </div>
+
+  <div class="tv-shell">
+    <div class="tv" id="tv">
+
+      <!-- 1. MINIMAL ZEN -->
+      <section class="screen zen" data-screen="zen">
+        <canvas class="ambient" data-pal="zen"></canvas>
+        <div class="zen-top">
+          <span data-wx>Sydney · 24° · Clear</span>
+          <button class="icon-btn" data-nav data-toast="Settings: wallpaper, app order, clock style, hidden apps" aria-label="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
+          </button>
+        </div>
+        <div class="clock-block">
+          <div class="time" data-clock>8:42</div>
+          <div class="date" data-date>Thursday 19 November</div>
+        </div>
+        <div class="zen-apps" data-apps="netflix,youtube,stan,mytv,iview,sbs" data-more></div>
+      </section>
+
+      <!-- 2. COMMAND CENTRE -->
+      <section class="screen cmd" data-screen="command" hidden>
+        <div class="cmd-top">
+          <h2>Good evening <span>· Thursday 19 Nov</span></h2>
+          <div class="status">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg><b>Home Wi-Fi</b> 86 Mbps</span>
+            <span><b data-clock-plain>8:42 pm</b></span>
+          </div>
+        </div>
+
+        <div class="cmd-mid">
+          <div class="panel">
+            <h3>Weather <em>Sydney</em></h3>
+            <button class="wx-now focusable" data-nav data-toast="7-day forecast opens here">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+              <div><div class="t">24°</div><div class="d">Clear · low 18° · UV 9 tomorrow</div></div>
+            </button>
+            <div class="wx-days">
+              <div>Fri<b>27°</b>sun</div><div>Sat<b>29°</b>sun</div><div>Sun<b>22°</b>rain</div><div>Mon<b>24°</b>cloud</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Live on My TV <em>IPTV</em></h3>
+            <div class="live-wrap">
+              <button class="preview" data-nav data-toast="Opening Sports 1 full screen">
+                <div class="feed"></div>
+                <span class="badge">LIVE</span>
+                <div class="meta">
+                  <b>Sports 1 · A-League Men</b>
+                  <span>Sydney FC v Melbourne Victory · 63'</span>
+                  <div class="progress"><i></i></div>
+                </div>
+              </button>
+              <div class="chips">
+                <button class="chip focusable" data-nav data-toast="Switching to News 24"><b>News 24</b><span>Evening bulletin</span></button>
+                <button class="chip focusable" data-nav data-toast="Switching to Movies 2"><b>Movies 2</b><span>Starts 8:30 pm</span></button>
+                <button class="chip focusable" data-nav data-toast="Opening the full TV guide"><b>TV guide</b><span>All channels</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Scores <em>following 4</em></h3>
+            <div class="scores">
+              <button class="score focusable" data-nav data-toast="Watch Sydney FC v Melbourne Victory on Sports 1">
+                <span class="comp">A-LEAGUE MEN</span><span class="teams">SYD v MVC</span><span class="res">1–0</span><span class="pill live">LIVE 63'</span>
+              </button>
+              <button class="score focusable" data-nav data-toast="Sheffield Shield match centre">
+                <span class="comp">SHEFFIELD SHIELD · DAY 2</span><span class="teams">NSW v QLD</span><span class="res">214/4</span><span class="pill live">LIVE</span>
+              </button>
+              <button class="score focusable" data-nav data-toast="Reminder set for Kings v Wildcats">
+                <span class="comp">NBL</span><span class="teams">SYD v PER</span><span class="res">—</span><span class="pill soon">7:30 PM FRI</span>
+              </button>
+              <button class="score focusable" data-nav data-toast="Match recap">
+                <span class="comp">NRLW</span><span class="teams">ROO v BRO</span><span class="res">22–18</span><span class="pill ft">FT</span>
+              </button>
+            </div>
+            <div class="sample">Sample data in this mockup</div>
+          </div>
+        </div>
+
+        <div class="cmd-bot">
+          <div class="panel">
+            <h3>Apps <em>hold OK to reorder</em></h3>
+            <div class="apps-strip" data-apps="netflix,youtube,stan,mytv,iview,sbs,sevenplus,spotify"></div>
+          </div>
+          <div class="panel">
+            <h3>System</h3>
+            <div class="sys">
+              <button class="sys-row focusable" data-nav data-toast="Amazon home-screen ads are switched off"><span>Amazon ads</span><b class="ok">Blocked</b></button>
+              <button class="sys-row focusable" data-nav data-toast="Cleared 412 MB of app cache"><span>Storage · 5.1 of 8 GB</span><b>Clean up</b></button>
+              <div class="meter"><i></i></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. COMBINED -->
+      <section class="screen combo" data-screen="combined" hidden>
+        <canvas class="ambient" data-pal="combo"></canvas>
+        <div class="zen-top">
+          <span data-wx>Sydney · 24° · Clear</span>
+          <button class="icon-btn" data-nav data-open-sheet aria-label="Customise">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+          </button>
+        </div>
+        <div class="clock-block">
+          <div class="time" data-clock>8:42</div>
+          <div class="date" data-date>Thursday 19 November</div>
+          <div class="glance">
+            <button class="g-chip" data-nav data-open-drawer><span class="dot"></span>SYD 1–0 MVC <span class="mono">63'</span></button>
+            <button class="g-chip" data-nav data-open-drawer>On My TV: Sports 1</button>
+            <button class="g-chip" data-nav data-open-drawer>Fri 27° sunny</button>
+          </div>
+        </div>
+        <div class="zen-apps" data-apps="netflix,youtube,stan,mytv,iview,sbs" data-more></div>
+        <div class="handle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>Down for dashboard</div>
+
+        <div class="drawer" data-layer="drawer">
+          <div class="panel">
+            <h3>Live on My TV <em>IPTV</em></h3>
+            <button class="preview" data-nav data-toast="Opening Sports 1 full screen">
+              <div class="feed"></div><span class="badge">LIVE</span>
+              <div class="meta"><b>Sports 1 · A-League Men</b><span>Sydney FC v Melbourne Victory · 63'</span><div class="progress"><i></i></div></div>
+            </button>
+            <div class="chips">
+              <button class="chip focusable" data-nav data-toast="Switching to News 24"><b>News 24</b><span>Bulletin</span></button>
+              <button class="chip focusable" data-nav data-toast="Opening the full TV guide"><b>TV guide</b><span>All channels</span></button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Scores</h3>
+            <div class="scores">
+              <button class="score focusable" data-nav data-toast="Watch on Sports 1"><span class="comp">A-LEAGUE MEN</span><span class="teams">SYD v MVC</span><span class="res">1–0</span><span class="pill live">LIVE 63'</span></button>
+              <button class="score focusable" data-nav data-toast="Sheffield Shield match centre"><span class="comp">SHIELD · DAY 2</span><span class="teams">NSW v QLD</span><span class="res">214/4</span><span class="pill live">LIVE</span></button>
+              <button class="score focusable" data-nav data-toast="Reminder set"><span class="comp">NBL</span><span class="teams">SYD v PER</span><span class="res">—</span><span class="pill soon">FRI</span></button>
+            </div>
+            <div class="sample">Sample data</div>
+          </div>
+          <div class="panel">
+            <h3>Weather</h3>
+            <button class="wx-now focusable" data-nav data-toast="7-day forecast opens here">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+              <div><div class="t">24°</div><div class="d">low 18°</div></div>
+            </button>
+            <div class="wx-days" style="grid-template-columns: repeat(2, 1fr)"><div>Fri<b>27°</b>sun</div><div>Sun<b>22°</b>rain</div></div>
+          </div>
+          <div class="panel">
+            <h3>System</h3>
+            <div class="sys">
+              <button class="sys-row focusable" data-nav data-toast="Amazon home-screen ads are switched off"><span>Amazon ads</span><b class="ok">Blocked</b></button>
+              <button class="sys-row focusable" data-nav data-toast="Cleared 412 MB of app cache"><span>5.1 / 8 GB</span><b>Clean</b></button>
+              <div class="meter"><i></i></div>
+              <button class="sys-row focusable" data-nav data-open-sheet><span>Layout</span><b>Customise</b></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet" data-layer="sheet">
+          <h3>Customise</h3>
+          <p>Changes apply straight away. Press Back to close.</p>
+          <div class="opt"><span>Accent</span>
+            <div class="seg" data-opt="accent">
+              <button data-nav data-val="#ffb547" aria-pressed="true"><i class="swatch" style="--sw:#ffb547"></i>Amber</button>
+              <button data-nav data-val="#9fc7b0" aria-pressed="false"><i class="swatch" style="--sw:#9fc7b0"></i>Sage</button>
+              <button data-nav data-val="#6cb8ff" aria-pressed="false"><i class="swatch" style="--sw:#6cb8ff"></i>Ocean</button>
+              <button data-nav data-val="#f29bb0" aria-pressed="false"><i class="swatch" style="--sw:#f29bb0"></i>Rose</button>
+            </div>
+          </div>
+          <div class="opt"><span>Clock</span>
+            <div class="seg" data-opt="clock">
+              <button data-nav data-val="12" aria-pressed="true">12-hour</button>
+              <button data-nav data-val="24" aria-pressed="false">24-hour</button>
+            </div>
+          </div>
+          <div class="opt"><span>Glance line under the clock</span>
+            <div class="seg" data-opt="glance">
+              <button data-nav data-val="on" aria-pressed="true">Show</button>
+              <button data-nav data-val="off" aria-pressed="false">Hide</button>
+            </div>
+          </div>
+          <div class="opt"><span>Wallpaper</span>
+            <div class="seg" data-opt="wall">
+              <button data-nav data-val="ambient" aria-pressed="true">Ambient</button>
+              <button data-nav data-val="solid" aria-pressed="false">Solid black</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- All apps overlay -->
+      <div class="allapps" data-layer="allapps" hidden>
+        <h3>All apps <span>Back to close</span></h3>
+        <div class="grid-apps" data-apps="netflix,youtube,stan,mytv,iview,sbs,sevenplus,ninenow,tenplay,spotify,disney,plex,downloader,files,settings,browser"></div>
+        <div class="hidden-row"><span class="label">Hidden by you</span><div style="display:flex;gap:1.6cqw" data-apps="prime,amzmusic,appstore"></div></div>
+      </div>
+
+      <div class="toast" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="under">
+    <div class="about" data-about="zen">
+      <h2>Minimal Zen</h2>
+      <p>A huge clock, the date, the weather and six apps on a slowly moving dark background. Nothing else. Everything you don't use daily sits behind the dots tile.</p>
+      <ul>
+        <li><b>Customisable:</b> which six apps show, their order, wallpaper, clock style.</li>
+        <li><b>Amazon's apps</b> are hidden in "All apps", not deleted.</li>
+      </ul>
+      <div class="keys"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> back · or use the remote on the right</div>
+    </div>
+    <div class="about" data-about="command" hidden>
+      <h2>Command Centre</h2>
+      <p>Everything at a glance: weather, what's live on your IPTV with a preview, scores for the teams you follow, your apps, and how the stick itself is doing.</p>
+      <ul>
+        <li><b>Customisable:</b> each widget can be moved, resized or switched off. Teams and channels are your own picks.</li>
+        <li><b>IPTV widget</b> is where your own IPTV app (part 2) plugs in.</li>
+      </ul>
+      <div class="keys"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> back</div>
+    </div>
+    <div class="about" data-about="combined" hidden>
+      <h2>Combined</h2>
+      <p>Zen is the default screen, with a small glance line under the clock. Press down past the apps and the dashboard slides up; press up or Back to tuck it away.</p>
+      <ul>
+        <li><b>Try the customise button</b> (top right): accent colour, 12/24-hour clock, glance line on or off, wallpaper.</li>
+        <li><b>Best of both:</b> calm when you just want Netflix, all the info one press away.</li>
+      </ul>
+      <div class="keys"><kbd>↓</kbd> from apps opens dashboard · <kbd>↑</kbd> / <kbd>Esc</kbd> closes · <kbd>Enter</kbd> open</div>
+    </div>
+
+    <div class="remote" aria-label="On-screen remote">
+      <button class="r-up" data-key="ArrowUp" aria-label="Up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 15l6-6 6 6"/></svg></button>
+      <button class="r-left" data-key="ArrowLeft" aria-label="Left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="r-ok ok" data-key="Enter" aria-label="OK">OK</button>
+      <button class="r-right" data-key="ArrowRight" aria-label="Right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="r-down" data-key="ArrowDown" aria-label="Down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="back" data-key="Escape">Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
+  const APPS = {
+    netflix:   { name: "Netflix",       brand: "#e50914", mark: "N" },
+    youtube:   { name: "YouTube",       brand: "#ff0033", mark: PLAY },
+    stan:      { name: "Stan",          brand: "#0a6cdc", mark: "stan" },
+    mytv:      { name: "My TV",         brand: "linear-gradient(135deg,#ffb547,#ff6a3d)", mark: "TV" },
+    iview:     { name: "ABC iview",     brand: "#1b1b1b", mark: "iview", small: true },
+    sbs:       { name: "SBS On Demand", brand: "#0e2d5a", mark: "SBS", small: true },
+    sevenplus: { name: "7plus",         brand: "#d7261e", mark: "7+" },
+    ninenow:   { name: "9Now",          brand: "#00a3e0", mark: "9" },
+    tenplay:   { name: "10 Play",       brand: "#202020", mark: "10" },
+    spotify:   { name: "Spotify",       brand: "#1db954", mark: "♪" },
+    disney:    { name: "Disney+",       brand: "#0b2a6b", mark: "D+" },
+    plex:      { name: "Plex",          brand: "#2b2b2b", mark: "plex", small: true },
+    downloader:{ name: "Downloader",    brand: "#e86b1c", mark: "↓" },
+    files:     { name: "Files",         brand: "#3a4357", mark: "F" },
+    settings:  { name: "Settings",      brand: "#3a4357", mark: "⚙︎" },
+    browser:   { name: "Browser",       brand: "#3a4357", mark: "www", small: true },
+    prime:     { name: "Prime Video",   brand: "#1a98ff", mark: "prime", small: true },
+    amzmusic:  { name: "Amazon Music",  brand: "#25d1da", mark: "♫" },
+    appstore:  { name: "Appstore",      brand: "#ff9900", mark: "A" },
+  };
+
+  const tv = document.getElementById("tv");
+  const toastEl = tv.querySelector(".toast");
+  const allapps = tv.querySelector('[data-layer="allapps"]');
+
+  // ---------- render app tiles ----------
+  document.querySelectorAll("[data-apps]").forEach(box => {
+    const html = box.dataset.apps.split(",").map(k => {
+      const a = APPS[k];
+      return `<button class="app" data-nav data-app="${a.name}"><span class="tile${a.small ? " small-mark" : ""}" style="--brand:${a.brand};background:${a.brand}">${a.mark}</span><span class="name">${a.name}</span></button>`;
+    }).join("");
+    box.innerHTML = html + ("more" in box.dataset
+      ? `<button class="app more" data-nav data-allapps><span class="tile"><span class="dots"><i></i><i></i><i></i></span></span><span class="name">All apps</span></button>` : "");
+  });
+
+  // ---------- clock ----------
+  let hour24 = false;
+  const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  function tick() {
+    const d = new Date(), h = d.getHours(), m = String(d.getMinutes()).padStart(2, "0");
+    const big = hour24 ? `${String(h).padStart(2,"0")}:${m}` : `${h % 12 || 12}:${m}<small>${h < 12 ? "am" : "pm"}</small>`;
+    const plain = hour24 ? `${String(h).padStart(2,"0")}:${m}` : `${h % 12 || 12}:${m} ${h < 12 ? "am" : "pm"}`;
+    document.querySelectorAll("[data-clock]").forEach(e => e.innerHTML = big);
+    document.querySelectorAll("[data-clock-plain]").forEach(e => e.textContent = plain);
+    document.querySelectorAll("[data-date]").forEach(e => e.textContent = `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`);
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ---------- ambient background ----------
+  const PAL = {
+    zen:   { bg: [11, 18, 17], blobs: [[60, 110, 95], [40, 70, 90], [90, 95, 70]] },
+    combo: { bg: [11, 18, 17], blobs: [[70, 90, 110], [110, 80, 50], [50, 95, 85]] },
+  };
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canvases = [...document.querySelectorAll(".ambient")].map(c => ({ c, ctx: c.getContext("2d"), pal: PAL[c.dataset.pal], solid: false }));
+  function draw(t) {
+    canvases.forEach(o => {
+      const { c, ctx, pal } = o;
+      if (c.offsetParent === null && !c.closest(".screen:not([hidden])")) return;
+      const dpr = Math.min(devicePixelRatio || 1, 1.5), w = c.clientWidth * dpr, h = c.clientHeight * dpr;
+      if (!w) return;
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = `rgb(${pal.bg})`; ctx.fillRect(0, 0, w, h);
+      if (o.solid) { ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, w, h); return; }
+      ctx.globalCompositeOperation = "lighter";
+      pal.blobs.forEach((col, i) => {
+        const s = t / 1000 * 0.05 + i * 2.1;
+        const x = w * (0.5 + 0.38 * Math.cos(s * (1 + i * 0.3)));
+        const y = h * (0.5 + 0.35 * Math.sin(s * (1.2 - i * 0.2)));
+        const r = Math.max(w, h) * (0.45 + 0.08 * Math.sin(s * 2));
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, `rgba(${col},0.38)`); g.addColorStop(1, `rgba(${col},0)`);
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      });
+    });
+    if (!reduce) requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  // ---------- screens ----------
+  const screens = [...tv.querySelectorAll(".screen")];
+  const ORDER = ["zen", "command", "combined"];
+  let current = "zen";
+  const lastFocus = {};
+  function show(name, focus = true) {
+    if (!ORDER.includes(name)) name = "zen";
+    closeAll();
+    current = name;
+    screens.forEach(s => s.hidden = s.dataset.screen !== name);
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.go === name));
+    document.querySelectorAll("[data-about]").forEach(a => a.hidden = a.dataset.about !== name);
+    if (reduce) requestAnimationFrame(draw);
+    if (focus) focusEl(lastFocus[name] || navList()[0]);
+  }
+  const screenEl = () => screens.find(s => s.dataset.screen === current);
+  const combo = screens.find(s => s.dataset.screen === "combined");
+  const sheet = combo.querySelector(".sheet");
+
+  // ---------- layers ----------
+  function topLayer() {
+    if (!allapps.hidden) return allapps;
+    if (current === "combined" && sheet.classList.contains("open")) return sheet;
+    if (current === "combined" && combo.classList.contains("open")) return combo.querySelector(".drawer");
+    return null;
+  }
+  function openDrawer() { combo.classList.add("open"); setTimeout(() => focusEl(navList()[0]), 60); }
+  function closeDrawer() { combo.classList.remove("open"); focusEl(combo.querySelector(".zen-apps .app")); }
+  function openSheet() { sheet.classList.add("open"); setTimeout(() => focusEl(sheet.querySelector('[aria-pressed="true"]')), 60); }
+  function closeSheet() { sheet.classList.remove("open"); focusEl(combo.querySelector("[data-open-sheet]")); }
+  let allFrom = null;
+  function openAll() { allFrom = document.activeElement; allapps.hidden = false; focusEl(allapps.querySelector(".app")); }
+  function closeAll() { if (!allapps.hidden) { allapps.hidden = true; if (allFrom) focusEl(allFrom); } }
+  function back() {
+    if (!allapps.hidden) return closeAll();
+    if (current === "combined" && sheet.classList.contains("open")) return closeSheet();
+    if (current === "combined" && combo.classList.contains("open")) return closeDrawer();
+    toast("You're on the home screen");
+  }
+
+  // ---------- spatial navigation ----------
+  function navList() {
+    const layer = topLayer();
+    let els = [...(layer || screenEl()).querySelectorAll("[data-nav]")];
+    if (!layer) els = els.filter(e => !e.closest(".drawer, .sheet"));
+    if (current === "combined" && combo.classList.contains("no-glance") && !layer) els = els.filter(e => !e.closest(".glance"));
+    return els.filter(e => e.getClientRects().length);
+  }
+  function focusEl(el) { if (el) el.focus({ preventScroll: true }); }
+  let lastTv = null;
+  tv.addEventListener("focusin", e => { lastTv = e.target; if (!topLayer()) lastFocus[current] = e.target; });
+  function move(dir) {
+    const list = navList();
+    if (!list.length) return;
+    const cur = list.includes(document.activeElement) ? document.activeElement : (list.includes(lastTv) ? lastTv : null);
+    if (!cur) return focusEl(list[0]);
+    const r = cur.getBoundingClientRect(), ax = r.left + r.width / 2, ay = r.top + r.height / 2;
+    let best = null, bestScore = Infinity;
+    list.forEach(el => {
+      if (el === cur) return;
+      const b = el.getBoundingClientRect(), bx = b.left + b.width / 2, by = b.top + b.height / 2;
+      const dx = bx - ax, dy = by - ay;
+      let p, s;
+      if (dir === "ArrowRight") { if (b.left < r.right - 2 && dx <= 2) return; if (dx <= 2) return; p = dx; s = Math.abs(dy); }
+      if (dir === "ArrowLeft")  { if (dx >= -2) return; p = -dx; s = Math.abs(dy); }
+      if (dir === "ArrowDown")  { if (dy <= 2) return; p = dy; s = Math.abs(dx); }
+      if (dir === "ArrowUp")    { if (dy >= -2) return; p = -dy; s = Math.abs(dx); }
+      const score = p + s * 2.2;
+      if (score < bestScore) { bestScore = score; best = el; }
+    });
+    if (best) return focusEl(best);
+    // edges
+    const layer = topLayer();
+    if (current === "combined" && !layer && dir === "ArrowDown") openDrawer();
+    else if (current === "combined" && layer && layer.classList.contains("drawer") && dir === "ArrowUp") closeDrawer();
+    else if (current === "combined" && layer === sheet && dir === "ArrowLeft") closeSheet();
+  }
+
+  function press(key) {
+    if (key.startsWith("Arrow")) move(key);
+    else if (key === "Enter") { const el = navList().includes(document.activeElement) ? document.activeElement : lastTv; if (el && el.isConnected) el.click(); }
+    else if (key === "Escape" || key === "Backspace") back();
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.target.closest && e.target.closest(".tabs") && !e.key.startsWith("Arrow")) return;
+    if (["1","2","3"].includes(e.key)) { show(ORDER[+e.key - 1]); setHash(); return; }
+    const inTv = tv.contains(document.activeElement) || document.activeElement === document.body;
+    if (!inTv) return;
+    if (e.key.startsWith("Arrow") || e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); press(e.key); }
+  });
+  document.querySelectorAll(".remote [data-key]").forEach(b => b.addEventListener("click", () => {
+    if (!navList().includes(lastTv)) focusEl(lastFocus[current] || navList()[0]);
+    else { if (b.dataset.key !== "Enter") focusEl(lastTv); }
+    press(b.dataset.key);
+  }));
+
+  // ---------- actions ----------
+  let tt;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove("show"), 2000); }
+  tv.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if ("allapps" in b.dataset) return openAll();
+    if ("openDrawer" in b.dataset) return openDrawer();
+    if ("openSheet" in b.dataset) { if (combo.classList.contains("open")) combo.classList.remove("open"); return openSheet(); }
+    if (b.dataset.app) return toast(b.dataset.app === "My TV" ? "Opening My TV (your IPTV app, part 2)" : `Opening ${b.dataset.app}…`);
+    if (b.dataset.toast) return toast(b.dataset.toast);
+    const seg = b.closest("[data-opt]");
+    if (seg) {
+      seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+      const v = b.dataset.val, opt = seg.dataset.opt;
+      if (opt === "accent") combo.style.setProperty("--acc", v);
+      if (opt === "clock") { hour24 = v === "24"; tick(); }
+      if (opt === "glance") combo.classList.toggle("no-glance", v === "off");
+      if (opt === "wall") { canvases.forEach(o => { if (o.c.dataset.pal === "combo") o.solid = v === "solid"; }); if (reduce) requestAnimationFrame(draw); }
+    }
+  });
+
+  // ---------- tabs + hash ----------
+  function setHash() { try { history.replaceState(null, "", "#" + current); } catch (_) { location.hash = current; } }
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { show(t.dataset.go); setHash(); }));
+  addEventListener("hashchange", () => show(location.hash.slice(1)));
+  show(location.hash.slice(1) || "zen", false);
+  setTimeout(() => focusEl(navList()[0]), 300);
+})();
+</script>
