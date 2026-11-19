@@ -1,0 +1,303 @@
+<title>Command Centre Green</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the original Command Centre, simplified. Clock leads the top band, weather + system tucked to its right,
+   live TV and scores in the middle, a quiet app row at the bottom. One green accent; everything else is near-black and grey.
+   Sizes in container units (1cqw = 1% of TV width). Single dark look on purpose: it's a TV. */
+:root {
+  color-scheme: dark;
+  --page: #0a0c0b; --page-fg: #d8ddd9; --muted: #87918b; --line: #1d2320; --bezel: #050606;
+  --bg: #0b0e0d;        /* TV background, slight green bias */
+  --panel: #121715;     /* quiet surface */
+  --panel-2: #18201c;   /* raised / focused surface */
+  --fg: #e8ece9;
+  --dim: #7f8a84;
+  --acc: #4fd18b;       /* the one green */
+  --acc-soft: #4fd18b22;
+  --f-time: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --f-ui: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+[hidden] { display: none !important; }
+html, body { background: var(--page); color: var(--page-fg); }
+body { font-family: var(--f-ui); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.bar h1 { font-weight: 700; font-size: 1.25rem; margin: 0; letter-spacing: -0.01em; }
+.bar h1 span { color: var(--muted); font-weight: 400; }
+
+.tv-shell { background: var(--bezel); border-radius: 14px; padding: 10px; box-shadow: 0 30px 80px -30px #000; }
+.tv { container-type: inline-size; position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 6px; background: var(--bg); color: var(--fg); }
+.tv button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.tv button:focus { outline: none; }
+
+.cc { height: 100%; box-sizing: border-box; padding: 3cqw 3.6cqw; display: grid; grid-template-rows: auto 1fr auto; gap: 2.4cqw; }
+
+/* ---- top band: the clock ---- */
+.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 3cqw; }
+.clock { display: flex; align-items: flex-end; gap: 2.2cqw; }
+.time { font: 200 10.5cqw/0.78 var(--f-time); letter-spacing: -0.045em; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; }
+.time .colon { color: var(--acc); animation: tickc 2s steps(1) infinite; margin: 0 0.05em; position: relative; top: -0.06em; }
+@keyframes tickc { 50% { opacity: 0.35; } }
+.time .ampm { font: 300 1.7cqw var(--f-time); color: var(--dim); letter-spacing: 0.04em; margin-left: 0.8cqw; }
+.when { display: flex; flex-direction: column; gap: 0.6cqw; padding-bottom: 0.3cqw; }
+.when .greet { font: 400 1.3cqw var(--f-ui); color: var(--dim); }
+.when .date { font: 300 2.2cqw var(--f-time); }
+.dayline { width: 16cqw; height: 0.25cqw; background: var(--panel-2); border-radius: 1cqw; overflow: hidden; margin-top: 0.4cqw; }
+.dayline i { display: block; height: 100%; width: 0; background: var(--acc); }
+.side { display: flex; align-items: flex-end; gap: 2.6cqw; }
+.wx { display: flex; align-items: center; gap: 1cqw; padding: 0.6cqw 0.9cqw; margin: -0.6cqw -0.9cqw; border-radius: 1cqw; }
+.wx svg { width: 2.8cqw; height: 2.8cqw; color: var(--acc); }
+.wx .t { font: 300 3.4cqw/1 var(--f-time); letter-spacing: -0.02em; }
+.wx .d { font: 400 1cqw var(--f-ui); color: var(--dim); display: flex; flex-direction: column; gap: 0.2cqw; }
+.sysline { display: flex; flex-direction: column; gap: 0.5cqw; font: 400 0.95cqw var(--f-mono); color: var(--dim); text-align: right; }
+.sysline b { color: var(--acc); font-weight: 500; }
+
+/* ---- shared focus ---- */
+.f { border-radius: 1cqw; transition: background .15s, box-shadow .15s; }
+.f:focus, .f:hover { background: var(--panel-2); box-shadow: 0 0 0 0.2cqw var(--acc); }
+
+/* ---- middle ---- */
+.mid { display: grid; grid-template-columns: 7fr 4fr; gap: 1.6cqw; min-height: 0; }
+.panel { background: var(--panel); border-radius: 1.3cqw; padding: 1.5cqw 1.7cqw; display: flex; flex-direction: column; gap: 1.1cqw; min-width: 0; min-height: 0; }
+.panel h3 { margin: 0; font: 500 0.9cqw var(--f-ui); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); display: flex; justify-content: space-between; }
+.panel h3 em { font-style: normal; letter-spacing: 0.04em; text-transform: none; font-family: var(--f-mono); opacity: .8; }
+
+.live { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.4cqw; flex: 1; min-height: 0; }
+.preview { position: relative; border-radius: 0.9cqw; overflow: hidden; display: block; transition: box-shadow .15s; }
+.preview .feed { position: absolute; inset: 0; background: linear-gradient(120deg, #173a2a, #1f4d37 45%, #143224 75%, #1b4532); background-size: 300% 300%; animation: feed 10s ease-in-out infinite; }
+.preview .feed::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 0.15cqw; background: #ffffff26; }
+.preview .feed::before { content: ""; position: absolute; left: 50%; top: 50%; width: 18%; aspect-ratio: 1; border: 0.15cqw solid #ffffff2e; border-radius: 50%; transform: translate(-50%, -50%); }
+@keyframes feed { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.preview .badge { position: absolute; top: 0.9cqw; left: 0.9cqw; display: flex; align-items: center; gap: 0.5cqw; font: 500 0.85cqw var(--f-mono); letter-spacing: 0.08em; color: var(--fg); background: #000a; padding: 0.3cqw 0.7cqw; border-radius: 0.5cqw; }
+.dot { width: 0.6cqw; height: 0.6cqw; border-radius: 50%; background: var(--acc); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.preview:focus, .preview:hover { box-shadow: 0 0 0 0.22cqw var(--acc); }
+.live-info { display: flex; flex-direction: column; gap: 0.9cqw; min-width: 0; }
+.now b { display: block; font: 500 1.6cqw var(--f-ui); letter-spacing: -0.01em; }
+.now span { display: block; font: 400 1.05cqw var(--f-ui); color: var(--dim); margin-top: 0.4cqw; }
+.progress { height: 0.3cqw; background: var(--panel-2); border-radius: 1cqw; overflow: hidden; margin-top: 0.9cqw; }
+.progress i { display: block; height: 100%; width: 62%; background: var(--acc); }
+.chans { display: flex; flex-direction: column; gap: 0.3cqw; margin-top: auto; }
+.chan { display: flex; justify-content: space-between; align-items: baseline; gap: 1cqw; padding: 0.55cqw 0.8cqw; margin: 0 -0.8cqw; }
+.chan b { font: 500 1.1cqw var(--f-ui); }
+.chan span { font: 400 0.9cqw var(--f-mono); color: var(--dim); white-space: nowrap; }
+
+.scores { display: flex; flex-direction: column; gap: 0.9cqw; }
+.score { display: grid; grid-template-columns: 1fr auto; gap: 0.15cqw 1cqw; align-items: baseline; padding: 0.65cqw 0.8cqw; margin: 0 -0.8cqw; }
+.score .comp { font: 400 0.8cqw var(--f-mono); color: var(--dim); letter-spacing: 0.04em; }
+.score .st { font: 500 0.8cqw var(--f-mono); color: var(--dim); text-align: right; }
+.score .st.live { color: var(--acc); }
+.score .teams { font: 500 1.2cqw var(--f-ui); }
+.score .res { font: 500 1.2cqw var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.sample { margin-top: auto; font: 400 0.75cqw var(--f-mono); color: var(--dim); opacity: .6; }
+
+/* ---- apps ---- */
+.apps { display: flex; gap: 1.8cqw; align-items: flex-start; }
+.app { display: flex; flex-direction: column; align-items: center; gap: 0.8cqw; }
+.app .tile { width: 6.6cqw; aspect-ratio: 1; border-radius: 1.5cqw; display: grid; place-items: center; background: var(--panel); color: var(--fg); font: 600 2cqw var(--f-ui); letter-spacing: -0.03em; transition: background .18s, transform .18s, box-shadow .18s, color .18s; }
+.app .tile.sm { font-size: 1.35cqw; }
+.app .tile svg { width: 2.3cqw; height: 2.3cqw; }
+.app .name { font: 400 0.95cqw var(--f-ui); color: var(--dim); transition: color .15s; }
+.app:focus .tile, .app:hover .tile { background: var(--brand); color: #fff; transform: scale(1.1); box-shadow: 0 0 0 0.2cqw var(--acc), 0 1cqw 2.4cqw -0.8cqw #000; }
+.app:focus .name, .app:hover .name { color: var(--fg); }
+.app.more .tile { background: transparent; box-shadow: inset 0 0 0 0.12cqw var(--panel-2); }
+.app.more:focus .tile, .app.more:hover .tile { background: var(--panel-2); }
+.dots { display: flex; gap: 0.45cqw; } .dots i { width: 0.55cqw; height: 0.55cqw; border-radius: 50%; background: currentColor; }
+
+.toast { position: absolute; left: 50%; bottom: 2.4cqw; transform: translate(-50%, 7cqw); background: var(--panel-2); color: var(--fg); font: 500 1.15cqw var(--f-ui); padding: 0.9cqw 1.6cqw; border-radius: 999px; box-shadow: inset 0 0 0 0.12cqw var(--acc-soft); transition: transform .3s cubic-bezier(.2,.8,.2,1); white-space: nowrap; display: flex; align-items: center; gap: 0.8cqw; }
+.toast::before { content: ""; width: 0.6cqw; height: 0.6cqw; border-radius: 50%; background: var(--acc); }
+.toast.show { transform: translate(-50%, 0); }
+
+/* ---- below the TV ---- */
+.under { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; }
+.about { min-width: 0; }
+.about h2 { font: 700 1.1rem var(--f-ui); margin: 0 0 6px; }
+.about p { margin: 0 0 10px; line-height: 1.55; max-width: 68ch; }
+.about ul { margin: 0; padding-left: 1.1em; line-height: 1.6; color: var(--muted); max-width: 68ch; }
+.about li b { color: var(--page-fg); font-weight: 500; }
+.keys { font: 400 0.8rem var(--f-mono); color: var(--muted); margin-top: 12px; }
+.keys kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; color: var(--page-fg); }
+.remote { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px) 40px; gap: 6px; background: #121614; padding: 14px; border-radius: 28px; border: 1px solid var(--line); }
+.remote button { background: #1b211e; border: 0; border-radius: 12px; color: var(--page-fg); display: grid; place-items: center; cursor: pointer; }
+.remote button:active { background: #26302b; }
+.remote button:focus-visible { outline: 2px solid var(--acc); }
+.remote svg { width: 18px; height: 18px; }
+.remote .ok { border-radius: 50%; background: #232a26; font: 600 0.8rem var(--f-ui); }
+.remote .back { grid-column: 1 / 4; border-radius: 999px; font: 500 0.8rem var(--f-ui); }
+.r-up { grid-column: 2; grid-row: 1; } .r-left { grid-column: 1; grid-row: 2; } .r-ok { grid-column: 2; grid-row: 2; } .r-right { grid-column: 3; grid-row: 2; } .r-down { grid-column: 2; grid-row: 3; } .back { grid-row: 4; }
+@media (max-width: 720px) { .under { grid-template-columns: 1fr; } .remote { justify-self: center; } .tv-shell { padding: 5px; border-radius: 10px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: 0s !important; } }
+</style>
+
+<div class="wrap">
+  <div class="bar"><h1>Command Centre <span>· green, minimal</span></h1></div>
+
+  <div class="tv-shell">
+    <div class="tv" id="tv">
+      <div class="cc">
+        <header class="top">
+          <div class="clock">
+            <div class="time" data-time>8<span class="colon">:</span>42<span class="ampm">PM</span></div>
+            <div class="when">
+              <span class="greet" data-greet>Good evening</span>
+              <span class="date" data-date>Thursday 19 November</span>
+              <span class="dayline" title="How much of the day has gone"><i data-day></i></span>
+            </div>
+          </div>
+          <div class="side">
+            <button class="wx f" data-nav data-toast="7-day forecast: Fri 27°, Sat 29°, Sun 22° rain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+              <span class="t">24°</span>
+              <span class="d"><span>Sydney · Clear</span><span>Low 18° · Fri 27°</span></span>
+            </button>
+            <div class="sysline">
+              <span>Wi-Fi <b>86 Mbps</b></span>
+              <span>Ads <b>blocked</b> · 2.9 GB free</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="mid">
+          <section class="panel">
+            <h3>On My TV <em>IPTV</em></h3>
+            <div class="live">
+              <button class="preview" data-nav data-toast="Opening Sports 1 full screen">
+                <span class="feed"></span>
+                <span class="badge"><span class="dot"></span>LIVE</span>
+              </button>
+              <div class="live-info">
+                <div class="now">
+                  <b>Sports 1</b>
+                  <span>Sydney FC v Melbourne Victory · 63'</span>
+                  <div class="progress"><i></i></div>
+                </div>
+                <div class="chans">
+                  <button class="chan f" data-nav data-toast="Switching to News 24"><b>News 24</b><span>Evening bulletin</span></button>
+                  <button class="chan f" data-nav data-toast="Switching to Movies 2"><b>Movies 2</b><span>8:30 pm</span></button>
+                  <button class="chan f" data-nav data-toast="Opening the TV guide"><b>TV guide</b><span>All channels</span></button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h3>Scores <em>4 followed</em></h3>
+            <div class="scores">
+              <button class="score f" data-nav data-toast="Watch on Sports 1"><span class="comp">A-LEAGUE MEN</span><span class="st live">LIVE 63'</span><span class="teams">Sydney FC v Victory</span><span class="res">1–0</span></button>
+              <button class="score f" data-nav data-toast="Sheffield Shield match centre"><span class="comp">SHEFFIELD SHIELD</span><span class="st live">DAY 2</span><span class="teams">NSW v QLD</span><span class="res">214/4</span></button>
+              <button class="score f" data-nav data-toast="Reminder set for Friday 7:30 pm"><span class="comp">NBL</span><span class="st">FRI 7:30PM</span><span class="teams">Kings v Wildcats</span><span class="res">—</span></button>
+              <button class="score f" data-nav data-toast="Match recap"><span class="comp">NRLW</span><span class="st">FT</span><span class="teams">Roosters v Broncos</span><span class="res">22–18</span></button>
+            </div>
+            <div class="sample">Sample data in this mockup</div>
+          </section>
+        </div>
+
+        <div class="apps" data-apps></div>
+      </div>
+      <div class="toast" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="under">
+    <div class="about">
+      <h2>Command Centre, green and minimal</h2>
+      <p>The original layout, cleaned up. The clock is now the main thing on screen, with the date, a greeting and a thin line showing how far through the day you are. Weather and system info sit quietly beside it.</p>
+      <ul>
+        <li><b>One colour:</b> green only shows where it matters: focus, live, progress.</li>
+        <li><b>App tiles</b> stay grey until you land on one, then it fills with that app's colour.</li>
+        <li><b>Fewer boxes:</b> two panels instead of five. The weather and system panels moved into the top line.</li>
+      </ul>
+      <div class="keys"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> back · or use the remote</div>
+    </div>
+    <div class="remote" aria-label="On-screen remote">
+      <button class="r-up" data-key="ArrowUp" aria-label="Up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 15l6-6 6 6"/></svg></button>
+      <button class="r-left" data-key="ArrowLeft" aria-label="Left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="r-ok ok" data-key="Enter" aria-label="OK">OK</button>
+      <button class="r-right" data-key="ArrowRight" aria-label="Right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="r-down" data-key="ArrowDown" aria-label="Down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="back" data-key="Escape">Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
+  const APPS = [
+    { name: "Netflix", brand: "#e50914", mark: "N" },
+    { name: "YouTube", brand: "#ff0033", mark: PLAY },
+    { name: "Stan", brand: "#0a6cdc", mark: "stan", sm: true },
+    { name: "My TV", brand: "#2f9e62", mark: "TV" },
+    { name: "ABC iview", brand: "#2a2a2a", mark: "iview", sm: true },
+    { name: "SBS", brand: "#0e2d5a", mark: "SBS", sm: true },
+    { name: "7plus", brand: "#d7261e", mark: "7+" },
+    { name: "9Now", brand: "#00a3e0", mark: "9" },
+    { name: "Spotify", brand: "#1db954", mark: "♪" },
+  ];
+  const tv = document.getElementById("tv");
+  tv.querySelector("[data-apps]").innerHTML = APPS.map(a =>
+    `<button class="app" data-nav data-app="${a.name}" style="--brand:${a.brand}"><span class="tile${a.sm ? " sm" : ""}">${a.mark}</span><span class="name">${a.name}</span></button>`
+  ).join("") + `<button class="app more" data-nav data-toast="All apps (Amazon's own apps are hidden in here)"><span class="tile"><span class="dots"><i></i><i></i><i></i></span></span><span class="name">All apps</span></button>`;
+
+  // clock
+  const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  function tick() {
+    const d = new Date(), H = d.getHours(), m = String(d.getMinutes()).padStart(2, "0");
+    tv.querySelector("[data-time]").innerHTML = `${H % 12 || 12}<span class="colon">:</span>${m}<span class="ampm">${H < 12 ? "AM" : "PM"}</span>`;
+    tv.querySelector("[data-date]").textContent = `${DAYS[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
+    tv.querySelector("[data-greet]").textContent = H < 5 ? "Up late" : H < 12 ? "Good morning" : H < 17 ? "Good afternoon" : "Good evening";
+    tv.querySelector("[data-day]").style.width = ((H * 60 + d.getMinutes()) / 1440 * 100).toFixed(1) + "%";
+  }
+  tick(); setInterval(tick, 1000);
+
+  // spatial nav
+  const navList = () => [...tv.querySelectorAll("[data-nav]")].filter(e => e.getClientRects().length);
+  const focusEl = el => el && el.focus({ preventScroll: true });
+  let lastTv = null;
+  tv.addEventListener("focusin", e => lastTv = e.target);
+  function move(dir) {
+    const list = navList();
+    const cur = list.includes(document.activeElement) ? document.activeElement : (list.includes(lastTv) ? lastTv : null);
+    if (!cur) return focusEl(list.find(e => e.classList.contains("app")));
+    const r = cur.getBoundingClientRect(), ax = r.left + r.width / 2, ay = r.top + r.height / 2;
+    let best = null, bs = Infinity;
+    list.forEach(el => {
+      if (el === cur) return;
+      const b = el.getBoundingClientRect(), dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay;
+      let p, s;
+      if (dir === "ArrowRight") { if (dx <= 2) return; p = dx; s = Math.abs(dy); }
+      if (dir === "ArrowLeft")  { if (dx >= -2) return; p = -dx; s = Math.abs(dy); }
+      if (dir === "ArrowDown")  { if (dy <= 2) return; p = dy; s = Math.abs(dx); }
+      if (dir === "ArrowUp")    { if (dy >= -2) return; p = -dy; s = Math.abs(dx); }
+      const sc = p + s * 2.2; if (sc < bs) { bs = sc; best = el; }
+    });
+    if (best) focusEl(best);
+  }
+  const toastEl = tv.querySelector(".toast"); let tt;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove("show"), 2000); }
+  function press(k) {
+    if (k.startsWith("Arrow")) move(k);
+    else if (k === "Enter") { const el = navList().includes(document.activeElement) ? document.activeElement : lastTv; if (el) el.click(); }
+    else toast("You're on the home screen");
+  }
+  tv.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.app) return toast(b.dataset.app === "My TV" ? "Opening My TV (your IPTV app, part 2)" : `Opening ${b.dataset.app}…`);
+    if (b.dataset.toast) toast(b.dataset.toast);
+  });
+  document.addEventListener("keydown", e => {
+    const inTv = tv.contains(document.activeElement) || document.activeElement === document.body;
+    if (!inTv) return;
+    if (e.key.startsWith("Arrow") || e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); press(e.key); }
+  });
+  document.querySelectorAll(".remote [data-key]").forEach(b => b.addEventListener("click", () => {
+    if (!navList().includes(lastTv)) focusEl(navList().find(e => e.classList.contains("app"))); else if (b.dataset.key !== "Enter") focusEl(lastTv);
+    press(b.dataset.key);
+  }));
+  setTimeout(() => focusEl(navList().find(e => e.classList.contains("app"))), 300);
+})();
+</script>
