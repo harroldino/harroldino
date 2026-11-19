@@ -1,0 +1,559 @@
+<title>Command Centre Themes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Archivo+Black&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+/* Layout: one Command Centre (same widgets, same remote logic) rendered into three 16:9 TV screens, each with its own theme and grid. Sizes use container units (1cqw = 1% of TV width). Deliberately dark page chrome: it's a TV. */
+:root {
+  color-scheme: dark;
+  --page: #0a0c10; --page-fg: #d9dde6; --muted: #8a93a6; --line: #1e2431; --bezel: #050608; --chrome-acc: #ffb547;
+  --f-ui: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "Space Mono", ui-monospace, Menlo, monospace;
+  --f-term: "Share Tech Mono", ui-monospace, Menlo, monospace;
+  --f-pix: "VT323", ui-monospace, Menlo, monospace;
+  --f-black: "Archivo Black", "Arial Black", Impact, sans-serif;
+}
+[hidden] { display: none !important; }
+html, body { background: var(--page); color: var(--page-fg); }
+body { font-family: var(--f-ui); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.bar h1 { font-weight: 700; font-size: 1.25rem; margin: 0; letter-spacing: -0.01em; }
+.bar h1 span { color: var(--muted); font-weight: 400; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { font: 500 0.9rem var(--f-ui); color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--page); background: var(--page-fg); border-color: var(--page-fg); }
+.tab:focus-visible { outline: 2px solid var(--chrome-acc); outline-offset: 2px; }
+.tab kbd { font-family: var(--f-mono); font-size: 0.75rem; opacity: 0.6; margin-right: 6px; }
+
+.tv-shell { background: var(--bezel); border-radius: 14px; padding: 10px; box-shadow: 0 30px 80px -30px #000; }
+.tv { container-type: inline-size; position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 6px; background: #000; }
+.screen { position: absolute; inset: 0; overflow: hidden; }
+.tv button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.tv button:focus { outline: none; }
+
+/* ---------- shared widget skeleton ---------- */
+.cc { position: relative; z-index: 1; height: 100%; display: grid; box-sizing: border-box; }
+.w { min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.w h3 { margin: 0; }
+.top { grid-area: top; display: flex; justify-content: space-between; align-items: center; gap: 2cqw; }
+.top h2 { margin: 0; font-weight: 400; }
+.status { display: flex; gap: 1.6cqw; align-items: center; }
+.w-wx { grid-area: wx; } .w-live { grid-area: live; } .w-sc { grid-area: sc; } .w-apps { grid-area: apps; } .w-sys { grid-area: sys; }
+.tthead, .fastext { display: none; }
+.wx-row { display: flex; flex-direction: column; flex: 1; gap: 0.9cqw; min-height: 0; }
+.wx-now { display: flex; align-items: center; gap: 1.2cqw; }
+.wx-now svg { flex: none; }
+.days { display: grid; grid-template-columns: repeat(4, 1fr); }
+.days div { display: flex; flex-direction: column; align-items: center; }
+.preview { position: relative; display: block; overflow: hidden; flex: 1; min-height: 0; }
+.feed { position: absolute; inset: 0; }
+.meta { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; }
+.progress { display: block; overflow: hidden; } .progress i { display: block; height: 100%; width: 62%; }
+.badge { position: absolute; }
+.chips { display: flex; }
+.chip { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.chip b, .chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scores { display: flex; flex-direction: column; }
+.score { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+.score .comp { grid-column: 1 / -1; }
+.score .pill { justify-self: end; }
+.score .res { text-align: right; font-variant-numeric: tabular-nums; }
+.apps { display: flex; align-items: flex-start; }
+.app { display: flex; flex-direction: column; align-items: center; }
+.app .tile { display: grid; place-items: center; aspect-ratio: 1; }
+.app .tile svg { width: 42%; height: 42%; }
+.app .name { white-space: nowrap; }
+.sys { display: flex; flex-direction: column; }
+.sys-row { display: flex; justify-content: space-between; align-items: center; gap: 1cqw; }
+.meter { overflow: hidden; } .meter i { display: block; height: 100%; width: 64%; }
+.ascii { display: none; }
+.sample { margin-top: auto; }
+
+/* =========================================================
+   1. MATRIX
+   ========================================================= */
+.th-matrix { --g: #3cff7a; --g2: #22c25a; --gdim: #0f4a24; --bg: #010503; --ink: #011208; background: var(--bg); color: var(--g); font-family: var(--f-term); }
+.rain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.32; }
+.scan { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: repeating-linear-gradient(0deg, transparent 0 2px, #00000055 2px 3px), radial-gradient(ellipse at center, transparent 55%, #000000aa 100%); }
+.th-matrix .cc { padding: 2.2cqw 2.6cqw; gap: 1.2cqw; grid-template-columns: 3.6fr 5fr 3.4fr; grid-template-rows: auto 1fr 14.4cqw; grid-template-areas: "top top top" "wx live sc" "apps apps sys"; text-shadow: 0 0 0.6cqw #3cff7a55; }
+.th-matrix .top h2 { font-size: 1.9cqw; }
+.th-matrix .top h2 .sub { color: var(--g2); }
+.th-matrix .top h2::after { content: ""; display: inline-block; width: 0.9cqw; height: 1.7cqw; margin-left: 0.5cqw; vertical-align: -0.25cqw; background: var(--g); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.th-matrix .status { font-size: 1.15cqw; color: var(--g2); }
+.th-matrix .status b { color: var(--g); font-weight: 400; }
+.th-matrix .status svg { width: 1.4cqw; height: 1.4cqw; vertical-align: -0.25cqw; margin-right: 0.4cqw; }
+.th-matrix .w { background: #010a05d9; border: 1px solid var(--gdim); padding: 1.3cqw 1.5cqw; gap: 0.9cqw; }
+.th-matrix .w::before, .th-matrix .w::after { content: ""; position: absolute; width: 1.2cqw; height: 1.2cqw; border-color: var(--g); border-style: solid; }
+.th-matrix .w::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.th-matrix .w::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+.th-matrix h3 { font: 400 1.05cqw var(--f-term); color: var(--g2); letter-spacing: 0.06em; display: flex; justify-content: space-between; }
+.th-matrix h3 em { font-style: normal; color: var(--gdim); text-shadow: none; }
+.th-matrix .focusable, .th-matrix .preview { transition: background .1s, color .1s; }
+.th-matrix .focusable:focus, .th-matrix .focusable:hover { background: var(--g); color: var(--ink); text-shadow: none; }
+.th-matrix .focusable:focus *, .th-matrix .focusable:hover * { color: var(--ink) !important; border-color: var(--ink) !important; }
+.th-matrix .wx-now { padding: 0.4cqw; margin: -0.4cqw; }
+.th-matrix .wx-now svg { width: 4.6cqw; height: 4.6cqw; }
+.th-matrix .wx-now .t { font: 400 6.4cqw/0.9 var(--f-pix); }
+.th-matrix .wx-now .d { font-size: 1.05cqw; color: var(--g2); }
+.th-matrix .days { gap: 0.5cqw; margin-top: auto; }
+.th-matrix .days div { border: 1px solid var(--gdim); padding: 0.5cqw 0; font-size: 0.95cqw; color: var(--g2); }
+.th-matrix .days b { font: 400 1.9cqw var(--f-pix); color: var(--g); }
+.th-matrix .preview { border: 1px solid var(--g2); }
+.th-matrix .preview:focus, .th-matrix .preview:hover { box-shadow: 0 0 0 2px var(--g), 0 0 2cqw #3cff7a55; }
+.th-matrix .feed { background: repeating-linear-gradient(90deg, #3cff7a14 0 1px, transparent 1px 2.4cqw), repeating-linear-gradient(0deg, #3cff7a14 0 1px, transparent 1px 2.4cqw), #010803; }
+.th-matrix .feed::before { content: ""; position: absolute; inset: 14% 10%; border: 1px solid #3cff7a80; background: linear-gradient(90deg, transparent calc(50% - 0.5px), #3cff7a80 calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)); }
+.th-matrix .feed::after { content: ""; position: absolute; left: 0; right: 0; height: 18%; background: linear-gradient(transparent, #3cff7a22, transparent); animation: sweep 3s linear infinite; }
+@keyframes sweep { from { top: -20%; } to { top: 100%; } }
+.th-matrix .badge { top: 0.8cqw; left: 0.8cqw; font-size: 0.95cqw; border: 1px solid var(--g); padding: 0.1cqw 0.5cqw; animation: blink 1.2s steps(1) infinite; }
+.th-matrix .meta { padding: 0.8cqw 1cqw; gap: 0.35cqw; background: linear-gradient(transparent, #000d); }
+.th-matrix .meta b { font-weight: 400; font-size: 1.3cqw; }
+.th-matrix .meta span { font-size: 0.95cqw; color: var(--g2); }
+.th-matrix .progress { height: 0.35cqw; background: var(--gdim); } .th-matrix .progress i { background: var(--g); }
+.th-matrix .chips { gap: 0.6cqw; }
+.th-matrix .chip { border: 1px solid var(--gdim); padding: 0.5cqw 0.8cqw; gap: 0.15cqw; }
+.th-matrix .chip b { font-weight: 400; font-size: 1.05cqw; } .th-matrix .chip span { font-size: 0.85cqw; color: var(--g2); }
+.th-matrix .scores { gap: 0.5cqw; }
+.th-matrix .score { border: 1px solid var(--gdim); padding: 0.5cqw 0.8cqw; gap: 0.15cqw 0.8cqw; }
+.th-matrix .score .comp { font-size: 0.8cqw; color: var(--g2); }
+.th-matrix .score .teams, .th-matrix .score .res { font-size: 1.1cqw; }
+.th-matrix .pill { font-size: 0.8cqw; }
+.th-matrix .pill::before { content: "["; } .th-matrix .pill::after { content: "]"; }
+.th-matrix .sample { font-size: 0.8cqw; color: var(--gdim); text-shadow: none; }
+.th-matrix .apps { gap: 1.6cqw; padding-top: 0.3cqw; }
+.th-matrix .app { gap: 0.6cqw; }
+.th-matrix .app .tile { width: 5.8cqw; border: 1px solid var(--g2); color: var(--g); font: 400 2.4cqw var(--f-pix); background: #01140a; transition: background .1s, color .1s, box-shadow .1s; }
+.th-matrix .app .name { font-size: 0.9cqw; color: var(--g2); text-transform: lowercase; }
+.th-matrix .app:focus .tile, .th-matrix .app:hover .tile { background: var(--g); color: var(--ink); box-shadow: 0 0 1.6cqw #3cff7a88; }
+.th-matrix .app:focus .name { color: var(--g); }
+.th-matrix .sys { gap: 0.4cqw; }
+.th-matrix .sys-row { padding: 0.45cqw 0.6cqw; font-size: 1cqw; }
+.th-matrix .sys-row span { color: var(--g2); }
+.th-matrix .meter { display: none; }
+.th-matrix .ascii { display: block; font-size: 1cqw; padding: 0 0.6cqw; color: var(--g2); white-space: pre; }
+
+/* =========================================================
+   2. TELETEXT (rogue #1)
+   ========================================================= */
+.th-teletext { --k: #000; --w: #ffffff; --y: #ffff00; --c: #00ffff; --gr: #00ff00; --m: #ff00ff; --r: #ff2020; --b: #0000ff; background: var(--k); color: var(--w); font-family: var(--f-pix); text-transform: uppercase; }
+.th-teletext .scan { background: repeating-linear-gradient(0deg, transparent 0 2px, #00000040 2px 3px); }
+.th-teletext .cc { padding: 1.4cqw 3cqw 1.2cqw; gap: 0.8cqw 2.4cqw; grid-template-columns: 1.15fr 1fr; grid-template-rows: auto auto 1fr auto auto auto; grid-template-areas: "tthead tthead" "top top" "live sc" "wx sys" "apps apps" "fast fast"; font-size: 2cqw; line-height: 1; }
+.th-teletext .tthead { grid-area: tthead; display: flex; justify-content: space-between; font-size: 2.1cqw; }
+.th-teletext .tthead .p { color: var(--w); } .th-teletext .tthead .n { color: var(--y); } .th-teletext .tthead .d { color: var(--c); }
+.th-teletext .top { background: var(--b); padding: 0.6cqw 1.2cqw; }
+.th-teletext .top h2 { font: 400 4.4cqw/0.9 var(--f-pix); color: var(--y); letter-spacing: 0.04em; transform: scaleY(1.15); transform-origin: left center; }
+.th-teletext .top h2 .sub { display: none; }
+.th-teletext .status { font-size: 1.9cqw; color: var(--c); } .th-teletext .status b { color: var(--w); font-weight: 400; }
+.th-teletext .status svg, .th-teletext .status b { display: none; }
+.th-teletext h3 { font: 400 2cqw var(--f-pix); color: var(--k); padding: 0.15cqw 0.8cqw; display: flex; justify-content: space-between; margin-bottom: 0.5cqw; }
+.th-teletext h3 em { font-style: normal; }
+.th-teletext .w-live h3 { background: var(--r); color: var(--w); }
+.th-teletext .w-sc h3 { background: var(--gr); }
+.th-teletext .w-wx h3 { background: var(--c); }
+.th-teletext .w-sys h3 { background: var(--m); color: var(--w); }
+.th-teletext .w-apps h3 { background: var(--y); }
+.th-teletext .focusable:focus, .th-teletext .focusable:hover { background: var(--w); color: var(--k); }
+.th-teletext .focusable:focus *, .th-teletext .focusable:hover * { color: var(--k) !important; }
+.th-teletext .preview { border: 0; }
+.th-teletext .preview:focus, .th-teletext .preview:hover { outline: 0.3cqw solid var(--y); }
+.th-teletext .feed canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+.th-teletext .badge { top: 0.5cqw; left: 0.5cqw; background: var(--r); color: var(--w); padding: 0 0.6cqw; font-size: 1.8cqw; animation: blink 1s steps(1) infinite; }
+.th-teletext .meta { background: var(--k); padding: 0.4cqw 0.6cqw; gap: 0.2cqw; }
+.th-teletext .meta b { font-weight: 400; color: var(--y); font-size: 1.9cqw; } .th-teletext .meta span { color: var(--c); font-size: 1.6cqw; }
+.th-teletext .progress { height: 0.5cqw; background: var(--b); } .th-teletext .progress i { background: var(--y); }
+.th-teletext .chips { gap: 1.4cqw; margin-top: 0.5cqw; }
+.th-teletext .chip { flex-direction: row; gap: 0.6cqw; padding: 0.1cqw 0.3cqw; }
+.th-teletext .chip b { font-weight: 400; color: var(--c); font-size: 1.8cqw; } .th-teletext .chip span { display: none; }
+.th-teletext .chip b::before { content: attr(data-pg) " "; color: var(--w); }
+.th-teletext .scores { gap: 0.3cqw; }
+.th-teletext .score { grid-template-columns: 1fr auto auto; padding: 0.25cqw 0.4cqw; gap: 0 1.2cqw; font-size: 2cqw; }
+.th-teletext .score .comp { color: var(--c); font-size: 1.6cqw; }
+.th-teletext .score .teams { color: var(--w); } .th-teletext .score .res { color: var(--y); }
+.th-teletext .pill { font-size: 1.6cqw; min-width: 7cqw; text-align: right; }
+.th-teletext .pill.live { color: var(--r); animation: blink 1.4s steps(1) infinite; } .th-teletext .pill.soon { color: var(--gr); } .th-teletext .pill.ft { color: var(--m); }
+.th-teletext .sample { color: var(--m); font-size: 1.4cqw; margin-top: 0.4cqw; }
+.th-teletext .wx-now { gap: 1.4cqw; padding: 0.2cqw 0.4cqw; }
+.th-teletext .w-wx { flex-direction: column; }
+.th-teletext .wx-row { flex-direction: row; gap: 2cqw; align-items: center; }
+.th-teletext .wx-now svg { width: 3.4cqw; height: 3.4cqw; color: var(--y); }
+.th-teletext .wx-now .t { font-size: 4.6cqw; color: var(--y); line-height: 0.8; }
+.th-teletext .wx-now .d { color: var(--c); font-size: 1.6cqw; max-width: 12cqw; }
+.th-teletext .days { gap: 1.2cqw; flex: 1; }
+.th-teletext .days div { font-size: 1.6cqw; color: var(--c); gap: 0.2cqw; }
+.th-teletext .days b { font-weight: 400; color: var(--w); font-size: 2.2cqw; }
+.th-teletext .sys { gap: 0.2cqw; }
+.th-teletext .sys-row { padding: 0.15cqw 0.4cqw; font-size: 1.8cqw; }
+.th-teletext .sys-row span { color: var(--w); } .th-teletext .sys-row b { font-weight: 400; color: var(--y); } .th-teletext .sys-row b.ok { color: var(--gr); }
+.th-teletext .meter { height: 1cqw; margin: 0.3cqw 0.4cqw 0; background: repeating-linear-gradient(90deg, var(--b) 0 1.2cqw, var(--k) 1.2cqw 1.5cqw); }
+.th-teletext .meter i { background: repeating-linear-gradient(90deg, var(--gr) 0 1.2cqw, var(--k) 1.2cqw 1.5cqw); }
+.th-teletext .w-apps { flex-direction: row; align-items: center; gap: 1.4cqw; }
+.th-teletext .w-apps h3 { margin: 0; white-space: nowrap; }
+.th-teletext .apps { gap: 0.8cqw; flex: 1; counter-reset: pg 100; }
+.th-teletext .app { flex: 1; gap: 0.3cqw; counter-increment: pg; }
+.th-teletext .app .tile { width: 100%; aspect-ratio: 2.2; background: var(--tt); color: var(--tt-fg, #000); font: 400 2.2cqw var(--f-pix); }
+.th-teletext .app .tile svg { width: 2.6cqw; height: 2.6cqw; }
+.th-teletext .app .name { font-size: 1.35cqw; color: var(--w); }
+.th-teletext .app .name::before { content: counter(pg) " "; color: var(--y); }
+.th-teletext .app:focus .tile, .th-teletext .app:hover .tile { outline: 0.3cqw solid var(--w); outline-offset: 0.25cqw; }
+.th-teletext .app:focus .name { background: var(--w); color: var(--k); }
+.th-teletext .fastext { grid-area: fast; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1cqw; }
+.th-teletext .fastext button { font-size: 2cqw; padding: 0.1cqw 0.4cqw; }
+.th-teletext .fastext .fr { color: var(--r); } .th-teletext .fastext .fg { color: var(--gr); } .th-teletext .fastext .fy { color: var(--y); } .th-teletext .fastext .fc { color: var(--c); }
+.th-teletext .fastext button:focus, .th-teletext .fastext button:hover { background: currentColor; }
+.th-teletext .fastext button:focus span, .th-teletext .fastext button:hover span { color: var(--k); }
+
+/* =========================================================
+   3. BRUTAL (rogue #2)
+   ========================================================= */
+.th-brutal { --bg: #b9a8ff; --ink: #0b0b0b; --paper: #ffffff; --yel: #ffe14d; --pink: #ff7ab6; --mint: #5cf2b0; --orange: #ff6b2c; --bw: 0.3cqw; background: var(--bg); color: var(--ink); font-family: var(--f-mono); }
+.th-brutal::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(#0b0b0b30 0.12cqw, transparent 0.14cqw); background-size: 1.6cqw 1.6cqw; }
+.th-brutal .cc { padding: 2cqw 2.6cqw 2.6cqw; gap: 1.6cqw; grid-template-columns: 3.2fr 3fr 3fr 3.4fr; grid-template-rows: auto 1fr 13.4cqw; grid-template-areas: "top top top top" "wx live live sc" "wx apps apps sys"; }
+.th-brutal .top h2 { font: 400 3.4cqw/1 var(--f-black); letter-spacing: -0.02em; text-transform: uppercase; }
+.th-brutal .top h2 .sub { display: inline-block; font: 700 1.1cqw var(--f-mono); letter-spacing: 0.06em; background: var(--ink); color: var(--yel); padding: 0.4cqw 0.8cqw; vertical-align: middle; margin-left: 1cqw; transform: rotate(-3deg); }
+.th-brutal .status { font: 700 1.1cqw var(--f-mono); }
+.th-brutal .status svg { width: 1.4cqw; height: 1.4cqw; vertical-align: -0.25cqw; margin-right: 0.3cqw; }
+.th-brutal .status > b { font: 400 2.2cqw var(--f-black); background: var(--paper); border: var(--bw) solid var(--ink); box-shadow: 0.4cqw 0.4cqw 0 var(--ink); padding: 0.3cqw 1cqw; }
+.th-brutal .w { border: var(--bw) solid var(--ink); box-shadow: 0.6cqw 0.6cqw 0 var(--ink); padding: 1.2cqw 1.4cqw; gap: 0.9cqw; background: var(--paper); }
+.th-brutal .w-wx { background: var(--yel); } .th-brutal .w-sc { background: var(--pink); } .th-brutal .w-sys { background: var(--orange); } .th-brutal .w-apps { background: var(--mint); }
+.th-brutal h3 { align-self: flex-start; font: 700 0.95cqw var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 0.3cqw 0.7cqw; display: flex; gap: 1cqw; }
+.th-brutal h3 em { font-style: normal; color: var(--yel); }
+.th-brutal .focusable { transition: transform .1s, box-shadow .1s, background .1s; }
+.th-brutal .focusable:focus, .th-brutal .focusable:hover { background: var(--ink); color: var(--paper); }
+.th-brutal .focusable:focus *, .th-brutal .focusable:hover * { color: var(--paper); }
+.th-brutal .wx-now { flex-direction: column; align-items: flex-start; gap: 0.4cqw; padding: 0.6cqw; margin: -0.6cqw; }
+.th-brutal .wx-now svg { width: 6cqw; height: 6cqw; animation: spin 18s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.th-brutal .wx-now .t { font: 400 9.5cqw/0.85 var(--f-black); letter-spacing: -0.05em; }
+.th-brutal .wx-now .d { font: 700 1.05cqw var(--f-mono); text-transform: uppercase; }
+.th-brutal .days { grid-template-columns: 1fr 1fr; gap: 0.6cqw; margin-top: auto; }
+.th-brutal .days div { flex-direction: row; justify-content: space-between; border: var(--bw) solid var(--ink); background: var(--paper); padding: 0.4cqw 0.7cqw; font: 700 0.95cqw var(--f-mono); text-transform: uppercase; }
+.th-brutal .days div span { display: none; }
+.th-brutal .days b { font: 400 1.4cqw var(--f-black); }
+.th-brutal .preview { border: var(--bw) solid var(--ink); transition: transform .1s; }
+.th-brutal .preview:focus, .th-brutal .preview:hover { transform: rotate(-0.6deg) scale(1.01); outline: 0.3cqw dashed var(--ink); outline-offset: 0.4cqw; }
+.th-brutal .feed { background: radial-gradient(#0b3d24 0.35cqw, transparent 0.4cqw) 0 0 / 1cqw 1cqw, var(--mint); }
+.th-brutal .feed::before { content: ""; position: absolute; left: 44%; top: 22%; width: 12%; aspect-ratio: 1; border: var(--bw) solid var(--ink); border-radius: 50%; background: var(--paper); }
+.th-brutal .badge { top: 1cqw; right: 1cqw; background: var(--ink); color: var(--yel); font: 400 1.6cqw var(--f-black); padding: 0.3cqw 1cqw; transform: rotate(4deg); }
+.th-brutal .meta { background: var(--paper); border-top: var(--bw) solid var(--ink); padding: 0.7cqw 1cqw; gap: 0.3cqw; }
+.th-brutal .meta b { font: 400 1.5cqw var(--f-black); text-transform: uppercase; } .th-brutal .meta span { font: 700 0.95cqw var(--f-mono); }
+.th-brutal .progress { height: 0.7cqw; border: 0.2cqw solid var(--ink); } .th-brutal .progress i { background: var(--orange); }
+.th-brutal .chips { gap: 0.8cqw; }
+.th-brutal .chip { border: var(--bw) solid var(--ink); background: var(--yel); padding: 0.5cqw 0.8cqw; }
+.th-brutal .chip:nth-child(2) { background: var(--pink); } .th-brutal .chip:nth-child(3) { background: var(--paper); }
+.th-brutal .chip b { font: 400 1.2cqw var(--f-black); text-transform: uppercase; } .th-brutal .chip span { font: 700 0.8cqw var(--f-mono); }
+.th-brutal .chip:focus, .th-brutal .chip:hover { transform: translate(-0.3cqw, -0.3cqw); box-shadow: 0.5cqw 0.5cqw 0 var(--ink); }
+.th-brutal .scores { gap: 0; border-top: var(--bw) solid var(--ink); }
+.th-brutal .score { border-bottom: var(--bw) solid var(--ink); padding: 0.55cqw 0.4cqw; gap: 0 0.8cqw; }
+.th-brutal .score .comp { font: 700 0.75cqw var(--f-mono); letter-spacing: 0.06em; }
+.th-brutal .score .teams { font: 400 1.3cqw var(--f-black); }
+.th-brutal .score .res { font: 400 1.7cqw var(--f-black); }
+.th-brutal .pill { display: none; }
+.th-brutal .score:has(.pill.live) .teams::after { content: "LIVE"; font: 700 0.75cqw var(--f-mono); background: var(--ink); color: var(--yel); padding: 0.1cqw 0.4cqw; margin-left: 0.6cqw; vertical-align: 0.2cqw; }
+.th-brutal .sample { font: 700 0.75cqw var(--f-mono); text-transform: uppercase; }
+.th-brutal .apps { gap: 0.9cqw; padding-top: 0.2cqw; }
+.th-brutal .app { gap: 0.6cqw; transition: transform .12s; }
+.th-brutal .app:nth-child(odd) { transform: rotate(-3deg); } .th-brutal .app:nth-child(even) { transform: rotate(2.5deg); }
+.th-brutal .app .tile { width: 4.1cqw; background: var(--brand); color: #fff; border: var(--bw) solid var(--ink); box-shadow: 0.4cqw 0.4cqw 0 var(--ink); font: 400 1.8cqw var(--f-black); }
+.th-brutal .app .tile.small-mark { font-size: 0.95cqw; }
+.th-brutal .app .tile svg { width: 1.8cqw; height: 1.8cqw; }
+.th-brutal .app .name { font: 700 0.68cqw var(--f-mono); text-transform: uppercase; }
+.th-brutal .app:focus, .th-brutal .app:hover { transform: rotate(0) translateY(-0.6cqw) scale(1.12); }
+.th-brutal .app:focus .tile, .th-brutal .app:hover .tile { box-shadow: 0.7cqw 0.7cqw 0 var(--ink); }
+.th-brutal .sys { gap: 0.4cqw; }
+.th-brutal .sys-row { font: 700 0.95cqw var(--f-mono); text-transform: uppercase; padding: 0.4cqw 0.5cqw; border: var(--bw) solid var(--ink); background: var(--paper); }
+.th-brutal .sys-row b { font: 400 1.1cqw var(--f-black); }
+.th-brutal .meter { height: 1cqw; border: var(--bw) solid var(--ink); background: var(--paper); }
+.th-brutal .meter i { background: repeating-linear-gradient(-45deg, var(--ink) 0 0.4cqw, transparent 0.4cqw 0.8cqw); }
+
+/* toast per theme */
+.toast { position: absolute; left: 50%; top: 2.6cqw; transform: translate(-50%, -8cqw); z-index: 9; white-space: nowrap; max-width: 90%; overflow: hidden; text-overflow: ellipsis; transition: transform .25s cubic-bezier(.2,.8,.2,1); padding: 0.9cqw 1.8cqw; font-size: 1.3cqw; }
+.toast.show { transform: translate(-50%, 0); }
+.tv[data-theme-now="matrix"] .toast { background: #010a05; color: #3cff7a; border: 1px solid #3cff7a; font-family: var(--f-term); text-shadow: 0 0 0.6cqw #3cff7a88; }
+.tv[data-theme-now="matrix"] .toast::before { content: "> "; }
+.tv[data-theme-now="teletext"] .toast { background: #0000ff; color: #ffff00; font: 400 2cqw var(--f-pix); text-transform: uppercase; }
+.tv[data-theme-now="brutal"] .toast { background: #ffe14d; color: #0b0b0b; border: 0.3cqw solid #0b0b0b; box-shadow: 0.5cqw 0.5cqw 0 #0b0b0b; font: 700 1.2cqw var(--f-mono); text-transform: uppercase; }
+
+/* ---------- below the TV ---------- */
+.under { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; }
+.about { min-width: 0; }
+.about h2 { font: 700 1.1rem var(--f-ui); margin: 0 0 6px; }
+.about p { margin: 0 0 10px; line-height: 1.55; max-width: 68ch; }
+.about ul { margin: 0; padding-left: 1.1em; line-height: 1.6; color: var(--muted); max-width: 68ch; }
+.about li b { color: var(--page-fg); font-weight: 500; }
+.keys { font: 400 0.8rem var(--f-mono); color: var(--muted); margin-top: 12px; }
+.keys kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; color: var(--page-fg); }
+.remote { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px) 40px; gap: 6px; background: #12151c; padding: 14px; border-radius: 28px; border: 1px solid var(--line); }
+.remote button { background: #1c2130; border: 0; border-radius: 12px; color: var(--page-fg); display: grid; place-items: center; cursor: pointer; }
+.remote button:active { background: #2a3147; }
+.remote button:focus-visible { outline: 2px solid var(--chrome-acc); }
+.remote svg { width: 18px; height: 18px; }
+.remote .ok { border-radius: 50%; background: #262c3d; font: 600 0.8rem var(--f-ui); }
+.remote .back { grid-column: 1 / 4; border-radius: 999px; font: 500 0.8rem var(--f-ui); }
+.r-up { grid-column: 2; grid-row: 1; } .r-left { grid-column: 1; grid-row: 2; } .r-ok { grid-column: 2; grid-row: 2; } .r-right { grid-column: 3; grid-row: 2; } .r-down { grid-column: 2; grid-row: 3; } .back { grid-row: 4; }
+@media (max-width: 720px) { .under { grid-template-columns: 1fr; } .remote { justify-self: center; } .tv-shell { padding: 5px; border-radius: 10px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: 0s !important; } }
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <h1>Command Centre <span>· 3 themes</span></h1>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-go="matrix" aria-selected="true"><kbd>1</kbd>Matrix</button>
+      <button class="tab" role="tab" data-go="teletext" aria-selected="false"><kbd>2</kbd>Teletext</button>
+      <button class="tab" role="tab" data-go="brutal" aria-selected="false"><kbd>3</kbd>Brutal</button>
+    </div>
+  </div>
+
+  <div class="tv-shell">
+    <div class="tv" id="tv" data-theme-now="matrix">
+      <section class="screen th-matrix" data-screen="matrix"><canvas class="rain"></canvas><div class="cc"></div><div class="scan"></div></section>
+      <section class="screen th-teletext" data-screen="teletext" hidden><div class="cc"></div><div class="scan"></div></section>
+      <section class="screen th-brutal" data-screen="brutal" hidden><div class="cc"></div></section>
+      <div class="toast" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="under">
+    <div class="about" data-about="matrix">
+      <h2>Matrix</h2>
+      <p>The Command Centre layout you liked, rebuilt as a green-on-black terminal. Code rain falls behind the panels, everything is monospace, and the thing you're on lights up solid green.</p>
+      <ul>
+        <li><b>Details:</b> CRT scanlines, corner brackets on each panel, a blinking cursor, storage shown as a text bar.</li>
+        <li><b>Customisable:</b> rain speed and density, glow strength, or swap green for amber or blue.</li>
+      </ul>
+      <div class="keys"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> back</div>
+    </div>
+    <div class="about" data-about="teletext" hidden>
+      <h2>Teletext</h2>
+      <p>Rogue one: your home screen as an old 1980s teletext page. Eight colours, chunky pixel type, page numbers for every app, and a blocky pixel picture for the live channel.</p>
+      <ul>
+        <li><b>Details:</b> page header with live clock, coloured section bars, and the four coloured shortcut buttons along the bottom.</li>
+        <li><b>Could go further:</b> type a page number on the remote (101 for Netflix) to jump straight there.</li>
+      </ul>
+      <div class="keys"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> back</div>
+    </div>
+    <div class="about" data-about="brutal" hidden>
+      <h2>Brutal</h2>
+      <p>Rogue two: a loud, bright poster. Thick black borders, hard shadows, a giant temperature, and app tiles stuck on like stickers. Nothing like a normal TV menu.</p>
+      <ul>
+        <li><b>Details:</b> each widget gets its own colour block, the apps straighten up and pop when you land on them.</li>
+        <li><b>Customisable:</b> swap the colour set, or turn the sticker tilt off.</li>
+      </ul>
+      <div class="keys"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> back</div>
+    </div>
+    <div class="remote" aria-label="On-screen remote">
+      <button class="r-up" data-key="ArrowUp" aria-label="Up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 15l6-6 6 6"/></svg></button>
+      <button class="r-left" data-key="ArrowLeft" aria-label="Left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="r-ok ok" data-key="Enter" aria-label="OK">OK</button>
+      <button class="r-right" data-key="ArrowRight" aria-label="Right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="r-down" data-key="ArrowDown" aria-label="Down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="back" data-key="Escape">Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
+  const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
+  const WIFI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg>';
+  const APPS = [
+    { name: "Netflix",   brand: "#e50914", mark: "N",   tt: "#ff2020", ttfg: "#fff" },
+    { name: "YouTube",   brand: "#ff0033", mark: PLAY,  tt: "#ffffff" },
+    { name: "Stan",      brand: "#0a6cdc", mark: "stan",tt: "#00ffff" },
+    { name: "My TV",     brand: "#ff8a2c", mark: "TV",  tt: "#ffff00" },
+    { name: "ABC iview", brand: "#1b1b1b", mark: "iview", small: true, tt: "#00ff00" },
+    { name: "SBS",       brand: "#0e2d5a", mark: "SBS", small: true, tt: "#ff00ff", ttfg: "#fff" },
+    { name: "7plus",     brand: "#d7261e", mark: "7+",  tt: "#ff2020", ttfg: "#fff" },
+    { name: "Spotify",   brand: "#1db954", mark: "♪",   tt: "#00ff00" },
+  ];
+  const L = {
+    matrix:   { wx: "> weather.sys", live: "> live_feed --iptv", sc: "> scores.log", apps: "> exec app", sys: "> sys.status", greet: "wake up. good evening", wxe: "sydney", sce: "tracking 4", appse: "hold ok: reorder", livee: "ch.01" },
+    teletext: { wx: "Weather", live: "Live TV", sc: "Sport", apps: "Apps", sys: "System", greet: "Good evening", wxe: "401", sce: "302", appse: "", livee: "300" },
+    brutal:   { wx: "Weather", live: "On now", sc: "Scores", apps: "Apps", sys: "System", greet: "Good evening.", wxe: "Sydney", sce: "4 teams", appse: "", livee: "My TV" },
+  };
+  const SCORES = [
+    { comp: "A-League Men", teams: "SYD v MVC", res: "1–0", pill: ["live", "LIVE 63'"], toast: "Watch Sydney FC v Melbourne Victory on Sports 1" },
+    { comp: "Sheffield Shield · Day 2", teams: "NSW v QLD", res: "214/4", pill: ["live", "LIVE"], toast: "Sheffield Shield match centre" },
+    { comp: "NBL", teams: "SYD v PER", res: "—", pill: ["soon", "FRI 7:30PM"], toast: "Reminder set for Kings v Wildcats" },
+    { comp: "NRLW", teams: "ROO v BRO", res: "22–18", pill: ["ft", "FT"], toast: "Match recap" },
+  ];
+
+  function render(th) {
+    const l = L[th];
+    const h = (k, e) => `<h3><span>${l[k]}</span>${e ? `<em>${e}</em>` : ""}</h3>`;
+    return `
+      <div class="tthead"><span class="p">P100</span><span class="n">HOMEVIEW 100</span><span class="d" data-date-short></span><span data-clock="hms"></span></div>
+      <header class="top">
+        <h2>${l.greet} <span class="sub" data-date></span></h2>
+        <div class="status"><span>${WIFI}Home Wi-Fi 86 Mbps</span><b data-clock="${th === "brutal" ? "hm12" : "hms"}"></b></div>
+      </header>
+      <section class="w w-wx">${h("wx", l.wxe)}
+        <div class="wx-row">
+          <button class="wx-now focusable" data-nav data-toast="7-day forecast opens here">${SUN}<span><span class="t">24°</span><br><span class="d">Clear · low 18°</span></span></button>
+          <div class="days"><div><span>Fri</span><b>27°</b>sun</div><div><span>Sat</span><b>29°</b>sun</div><div><span>Sun</span><b>22°</b>rain</div><div><span>Mon</span><b>24°</b>cloud</div></div>
+        </div>
+      </section>
+      <section class="w w-live">${h("live", l.livee)}
+        <button class="preview" data-nav data-toast="Opening Sports 1 full screen">
+          <span class="feed"></span><span class="badge">LIVE</span>
+          <span class="meta"><b>Sports 1 · A-League Men</b><span>Sydney FC v Melbourne Victory · 63'</span><span class="progress"><i></i></span></span>
+        </button>
+        <div class="chips">
+          <button class="chip focusable" data-nav data-pg="301" data-toast="Switching to News 24"><b data-pg="301">News 24</b><span>Evening bulletin</span></button>
+          <button class="chip focusable" data-nav data-pg="304" data-toast="Switching to Movies 2"><b data-pg="304">Movies 2</b><span>Starts 8:30 pm</span></button>
+          <button class="chip focusable" data-nav data-pg="310" data-toast="Opening the full TV guide"><b data-pg="310">TV guide</b><span>All channels</span></button>
+        </div>
+      </section>
+      <section class="w w-sc">${h("sc", l.sce)}
+        <div class="scores">${SCORES.map(s => `<button class="score focusable" data-nav data-toast="${s.toast}"><span class="comp">${s.comp}</span><span class="teams">${s.teams}</span><span class="res">${s.res}</span><span class="pill ${s.pill[0]}">${s.pill[1]}</span></button>`).join("")}</div>
+        <div class="sample">Sample data in this mockup</div>
+      </section>
+      <section class="w w-apps">${h("apps", l.appse)}
+        <div class="apps">${APPS.map(a => `<button class="app" data-nav data-app="${a.name}"><span class="tile${a.small ? " small-mark" : ""}" style="--brand:${a.brand};--tt:${a.tt};--tt-fg:${a.ttfg || "#000"}">${a.mark}</span><span class="name">${a.name}</span></button>`).join("")}</div>
+      </section>
+      <section class="w w-sys">${h("sys")}
+        <div class="sys">
+          <button class="sys-row focusable" data-nav data-toast="Amazon home-screen ads are switched off"><span>Amazon ads</span><b class="ok">Blocked</b></button>
+          <button class="sys-row focusable" data-nav data-toast="Cleared 412 MB of app cache"><span>Storage 5.1/8 GB</span><b>Clean up</b></button>
+          <div class="meter"><i></i></div>
+          <div class="ascii">[██████░░░░] 64%</div>
+        </div>
+      </section>
+      <div class="fastext">
+        <button class="fr" data-nav data-toast="Live TV guide"><span>Live TV</span></button>
+        <button class="fg" data-nav data-toast="Sport index"><span>Sport</span></button>
+        <button class="fy" data-nav data-toast="All apps"><span>All apps</span></button>
+        <button class="fc" data-nav data-toast="Settings"><span>Settings</span></button>
+      </div>`;
+  }
+
+  const tv = document.getElementById("tv");
+  const screens = [...tv.querySelectorAll(".screen")];
+  screens.forEach(s => s.querySelector(".cc").innerHTML = render(s.dataset.screen));
+
+  // ---------- clock ----------
+  const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const MON = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const p2 = n => String(n).padStart(2, "0");
+  function tick() {
+    const d = new Date(), H = d.getHours();
+    document.querySelectorAll('[data-clock="hms"]').forEach(e => e.textContent = `${p2(H)}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`);
+    document.querySelectorAll('[data-clock="hm12"]').forEach(e => e.textContent = `${H % 12 || 12}:${p2(d.getMinutes())}${H < 12 ? "AM" : "PM"}`);
+    document.querySelectorAll("[data-date]").forEach(e => e.textContent = `${DAYS[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()].slice(0, 3)}`);
+    document.querySelectorAll("[data-date-short]").forEach(e => e.textContent = `${DAYS[d.getDay()].slice(0, 3)} ${p2(d.getDate())} ${MON[d.getMonth()].slice(0, 3)}`);
+  }
+  tick(); setInterval(tick, 1000);
+
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- matrix rain ----------
+  const rain = tv.querySelector(".rain"), rctx = rain.getContext("2d");
+  const GLYPHS = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789:=*+<>";
+  let drops = [], fs = 14, lastRain = 0;
+  function sizeRain() {
+    const w = rain.clientWidth, h = rain.clientHeight; if (!w) return;
+    rain.width = w; rain.height = h; fs = Math.max(10, Math.round(w / 70));
+    drops = Array.from({ length: Math.ceil(w / fs) }, () => Math.random() * -h / fs);
+    rctx.fillStyle = "#010503"; rctx.fillRect(0, 0, w, h);
+  }
+  function stepRain(t) {
+    if (current === "matrix" && t - lastRain > 55) {
+      lastRain = t;
+      if (rain.width !== rain.clientWidth) sizeRain();
+      rctx.fillStyle = "rgba(1,5,3,0.12)"; rctx.fillRect(0, 0, rain.width, rain.height);
+      rctx.font = `${fs}px "Share Tech Mono", monospace`;
+      drops.forEach((y, i) => {
+        const ch = GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        rctx.fillStyle = Math.random() > 0.96 ? "#d8ffe4" : "#3cff7a";
+        rctx.fillText(ch, i * fs, y * fs);
+        drops[i] = (y * fs > rain.height && Math.random() > 0.975) ? 0 : y + 1;
+      });
+    }
+    if (!reduce) requestAnimationFrame(stepRain);
+  }
+  sizeRain();
+  if (reduce) { for (let i = 0; i < 60; i++) stepRain(i * 60 + 100); } else requestAnimationFrame(stepRain);
+
+  // ---------- teletext mosaic picture ----------
+  tv.querySelectorAll(".th-teletext .feed").forEach(f => {
+    const c = document.createElement("canvas"); c.width = 48; c.height = 20; f.appendChild(c);
+    const x = c.getContext("2d");
+    x.fillStyle = "#00aa00"; x.fillRect(0, 0, 48, 20);
+    for (let i = 0; i < 48; i += 6) { x.fillStyle = "#00ff00"; x.fillRect(i, 0, 3, 20); }
+    x.fillStyle = "#ffffff"; x.fillRect(2, 2, 44, 1); x.fillRect(2, 17, 44, 1); x.fillRect(2, 2, 1, 16); x.fillRect(45, 2, 1, 16); x.fillRect(24, 2, 1, 16);
+    x.fillRect(22, 8, 5, 1); x.fillRect(22, 12, 5, 1); x.fillRect(21, 9, 1, 3); x.fillRect(27, 9, 1, 3);
+    [[10, 7, "#ffff00"], [14, 12, "#ffff00"], [33, 9, "#ff00ff"], [37, 5, "#ff00ff"], [30, 13, "#ff00ff"], [18, 9, "#ffff00"]].forEach(([a, b, col]) => { x.fillStyle = col; x.fillRect(a, b, 2, 2); });
+    x.fillStyle = "#ffffff"; x.fillRect(26, 10, 1, 1);
+  });
+
+  // ---------- screens + nav ----------
+  const ORDER = ["matrix", "teletext", "brutal"];
+  let current = "matrix";
+  const lastFocus = {};
+  const toastEl = tv.querySelector(".toast");
+  const screenEl = () => screens.find(s => s.dataset.screen === current);
+  function navList() { return [...screenEl().querySelectorAll("[data-nav]")].filter(e => e.getClientRects().length); }
+  function focusEl(el) { if (el) el.focus({ preventScroll: true }); }
+  function show(name, focus = true) {
+    if (!ORDER.includes(name)) name = "matrix";
+    current = name; tv.dataset.themeNow = name;
+    screens.forEach(s => s.hidden = s.dataset.screen !== name);
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.go === name));
+    document.querySelectorAll("[data-about]").forEach(a => a.hidden = a.dataset.about !== name);
+    if (name === "matrix") sizeRain();
+    if (focus) focusEl(lastFocus[name] || navList().find(e => e.classList.contains("app")) || navList()[0]);
+  }
+  let lastTv = null;
+  tv.addEventListener("focusin", e => { lastTv = e.target; lastFocus[current] = e.target; });
+  function move(dir) {
+    const list = navList(); if (!list.length) return;
+    const cur = list.includes(document.activeElement) ? document.activeElement : (list.includes(lastTv) ? lastTv : null);
+    if (!cur) return focusEl(list[0]);
+    const r = cur.getBoundingClientRect(), ax = r.left + r.width / 2, ay = r.top + r.height / 2;
+    let best = null, bestScore = Infinity;
+    list.forEach(el => {
+      if (el === cur) return;
+      const b = el.getBoundingClientRect(), dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay;
+      let p, s;
+      if (dir === "ArrowRight") { if (dx <= 2) return; p = dx; s = Math.abs(dy); }
+      if (dir === "ArrowLeft")  { if (dx >= -2) return; p = -dx; s = Math.abs(dy); }
+      if (dir === "ArrowDown")  { if (dy <= 2) return; p = dy; s = Math.abs(dx); }
+      if (dir === "ArrowUp")    { if (dy >= -2) return; p = -dy; s = Math.abs(dx); }
+      const score = p + s * 2.2;
+      if (score < bestScore) { bestScore = score; best = el; }
+    });
+    if (best) focusEl(best);
+  }
+  let tt;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove("show"), 2000); }
+  function press(key) {
+    if (key.startsWith("Arrow")) move(key);
+    else if (key === "Enter") { const el = navList().includes(document.activeElement) ? document.activeElement : lastTv; if (el) el.click(); }
+    else if (key === "Escape" || key === "Backspace") toast("You're on the home screen");
+  }
+  tv.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.app) return toast(b.dataset.app === "My TV" ? "Opening My TV (your IPTV app, part 2)" : `Opening ${b.dataset.app}…`);
+    if (b.dataset.toast) toast(b.dataset.toast);
+  });
+  document.addEventListener("keydown", e => {
+    if (["1","2","3"].includes(e.key)) { show(ORDER[+e.key - 1]); setHash(); return; }
+    const inTv = tv.contains(document.activeElement) || document.activeElement === document.body;
+    if (!inTv) return;
+    if (e.key.startsWith("Arrow") || e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); press(e.key); }
+  });
+  document.querySelectorAll(".remote [data-key]").forEach(b => b.addEventListener("click", () => {
+    if (!navList().includes(lastTv)) focusEl(lastFocus[current] || navList()[0]); else if (b.dataset.key !== "Enter") focusEl(lastTv);
+    press(b.dataset.key);
+  }));
+  function setHash() { try { history.replaceState(null, "", "#" + current); } catch (_) { location.hash = current; } }
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { show(t.dataset.go); setHash(); }));
+  addEventListener("hashchange", () => show(location.hash.slice(1)));
+  addEventListener("resize", () => { if (current === "matrix") sizeRain(); });
+  show(location.hash.slice(1) || "matrix", false);
+  setTimeout(() => focusEl(navList().find(e => e.classList.contains("app"))), 300);
+})();
+</script>
