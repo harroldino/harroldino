@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.harroldino.home'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.harroldino.home'
+        minSdk 22          // Fire OS 5 and newer
+        targetSdk 34
+        versionCode (System.getenv('BUILD_NUMBER') ?: '1').toInteger()
+        versionName "1.0.${System.getenv('BUILD_NUMBER') ?: '0'}"
+    }
+
+    signingConfigs {
+        // A fixed key so each new build installs over the last one.
+        // It lives in the repo on purpose: this is a personal sideloaded app, not a store release.
+        shared {
+            storeFile file('../keystore/home.keystore')
+            storePassword 'android'
+            keyAlias 'home'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.shared
+        }
+        debug {
+            signingConfig signingConfigs.shared
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

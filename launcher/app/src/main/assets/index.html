@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command Centre</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="tv" id="tv">
+  <div class="cc" id="home">
+    <header class="top">
+      <div class="clock">
+        <div class="time" id="time">--<span class="colon">:</span>--</div>
+        <div class="when">
+          <span class="greet" id="greet"></span>
+          <span class="date" id="date"></span>
+          <span class="dayline"><i id="day"></i></span>
+        </div>
+      </div>
+      <div class="side">
+        <button class="wx f" id="wx" data-nav>
+          <span id="wx-icon"></span>
+          <span class="t" id="wx-t">--°</span>
+          <span class="d"><span id="wx-l1">Loading weather</span><span id="wx-l2"></span></span>
+        </button>
+        <div class="sysline"><span id="sys-net"></span><span id="sys-disk"></span></div>
+      </div>
+    </header>
+
+    <div class="mid">
+      <section class="panel">
+        <h3>Watch <em id="watch-em"></em></h3>
+        <div class="live">
+          <button class="feature" id="feature" data-nav>
+            <span class="feed"></span>
+            <span class="badge"><span class="dot"></span>LIVE TV</span>
+            <span class="feature-body">
+              <span class="feature-icon" id="feature-icon"></span>
+              <span><b>My TV</b><span id="feature-sub">Choose your IPTV app</span></span>
+            </span>
+          </button>
+          <div class="recent">
+            <h4>Recently opened</h4>
+            <div class="recent-list" id="recents"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Scores <em id="scores-em"></em></h3>
+        <div class="scores" id="scores"><div class="empty">Loading scores…</div></div>
+      </section>
+    </div>
+
+    <div class="apps" id="apps"></div>
+  </div>
+
+  <!-- All apps -->
+  <div class="layer" id="all" hidden>
+    <div class="layer-head"><h2>All apps</h2><span>OK opens · Menu ☰ pins or unpins · Back closes</span></div>
+    <div class="grid" id="all-grid"></div>
+  </div>
+
+  <!-- Pick the IPTV app -->
+  <div class="layer" id="picker" hidden>
+    <div class="layer-head"><h2>Which app is your IPTV?</h2><span>This is what the My TV tile opens</span></div>
+    <div class="grid" id="picker-grid"></div>
+  </div>
+
+  <!-- Settings -->
+  <div class="layer sheet" id="settings" hidden>
+    <div class="layer-head"><h2>Settings</h2><span id="version"></span></div>
+    <div class="rows">
+      <div class="row"><span class="lab">Clock</span>
+        <div class="seg" data-opt="hour24">
+          <button data-nav data-val="false">12-hour</button>
+          <button data-nav data-val="true">24-hour</button>
+        </div>
+      </div>
+      <div class="row"><span class="lab">Weather location</span>
+        <div class="seg">
+          <input id="city" data-nav type="text" autocomplete="off" spellcheck="false" placeholder="Type a city">
+          <button data-nav id="city-save">Save</button>
+        </div>
+      </div>
+      <div class="row"><span class="lab">My TV opens</span>
+        <div class="seg"><button data-nav id="pick-iptv">Choose app</button></div>
+      </div>
+      <div class="row"><span class="lab">Scores from</span>
+        <div class="seg" id="leagues"></div>
+      </div>
+      <div class="row"><span class="lab">Home button</span>
+        <div class="seg">
+          <span class="state" id="home-state"></span>
+          <button data-nav id="home-setup">Set up</button>
+        </div>
+      </div>
+      <div class="row"><span class="lab">More</span>
+        <div class="seg">
+          <button data-nav id="fire-settings">Fire TV settings</button>
+          <button data-nav id="amazon-home">Amazon home for 5 min</button>
+          <button data-nav id="reset-apps">Reset app row</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint" id="home-hint">To make the remote's Home button open this screen: choose Set up, then turn on “Command Centre Home button” in Accessibility.</p>
+  </div>
+
+  <!-- Options for an app in the row -->
+  <div class="layer menu" id="actions" hidden>
+    <h2 id="actions-title">App</h2>
+    <div class="menu-btns">
+      <button data-nav data-act="left">Move left</button>
+      <button data-nav data-act="right">Move right</button>
+      <button data-nav data-act="unpin">Remove from row</button>
+      <button data-nav data-act="close">Cancel</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

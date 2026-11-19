@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Command Centre</string>
+    <string name="a11y_label">Command Centre Home button</string>
+    <string name="a11y_desc">Sends the remote\'s Home button to Command Centre instead of Amazon\'s home screen. It only watches for Amazon\'s home screen opening and reads nothing else.</string>
+</resources>
