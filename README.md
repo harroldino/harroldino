@@ -90,6 +90,12 @@ My TV is the IPTV app that the **My TV** tile opens. It looks like the big strea
 To install it, use Downloader with:
 `https://github.com/harroldino/harroldino/releases/download/mytv/my-tv.apk`
 
+Or install it from a Windows PC on the same Wi-Fi, which also lets you type your login on the PC keyboard. Turn on *ADB debugging* on the Fire Stick (see above), then run this in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/harroldino/harroldino/claude/optimistic-babbage-x2s8vm/scripts/install-mytv.ps1 | iex
+```
+
 The screen is HTML, CSS and JavaScript in `iptv/app/src/main/assets/`, like Command Centre. Open `index.html` in a desktop browser to preview it with made-up channels: arrow keys move, Enter selects, `m` is Menu and Esc is Back. Add `?login` to the address to see the sign-in screen. To build it yourself: `gradle -p iptv assembleRelease`.
 
 ## Building it yourself
