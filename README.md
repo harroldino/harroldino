@@ -41,6 +41,16 @@ This works on Fire TV devices that run Fire OS, which is Android-based. That cov
    Then choose **Install**. This link only works if the GitHub repository is public. If yours is private, download `command-centre.apk` from the repository's **Releases** page on a computer and install it with ADB instead: `adb connect <fire-stick-ip>` then `adb install -r command-centre.apk`.
 5. **Open it.** It appears in your Fire TV apps as **Command Centre**.
 
+### Or install it from a Windows PC in one go
+
+On the Fire Stick, turn on *Settings → My Fire TV → Developer options → ADB debugging*. Then on a Windows PC on the same Wi-Fi, open PowerShell and run:
+
+```powershell
+irm https://raw.githubusercontent.com/harroldino/harroldino/claude/charming-allen-pgwomg/scripts/install-firestick.ps1 | iex
+```
+
+It asks for the Fire Stick's IP address, downloads `adb` and the latest build, installs the app, turns on the Home button redirect and opens Command Centre. The script is `scripts/install-firestick.ps1` if you want to read it first.
+
 ### Make the Home button open it
 
 Fire OS doesn't let you choose a different home screen. Command Centre gets around this with a small accessibility service that only watches for Amazon's home screen opening and switches straight back to Command Centre.
