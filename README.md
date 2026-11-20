@@ -9,12 +9,18 @@ A custom home screen for an Amazon Fire TV Stick. It shows a big clock, the weat
 
 | Part of the screen | What it shows |
 | --- | --- |
-| Clock | Time, date, a greeting, and a thin line showing how much of the day has gone. 12 or 24-hour. |
+| Clock | Time, date, "Welcome back" with your name (set it in Settings), and a thin line showing how much of the day has gone. 12 or 24-hour. |
 | Weather | Current temperature and conditions, today's low and tomorrow's high. Select it to see the next few days. Uses Open-Meteo (free, no account). |
-| Watch | A large **My TV** card that opens your IPTV app, plus the last three apps you opened. |
+| Continue watching | The show you watched last, with episode, how much is left and when you watched it. Press OK to go back to it. Earlier shows are listed beside it. Menu ☰ on a show removes it. |
 | Scores | Live, upcoming and recent matches from leagues you pick: A-League Men and Women, AFL, NRL, Premier League, NBA. Uses ESPN's public scoreboards. |
 | System | Wi-Fi speed and free storage. |
 | App row | **My TV** plus up to 8 apps you choose, then **All apps** and **Settings**. |
+
+### How Continue watching works
+
+Netflix, Stan and the like don't let other apps see their watch history. What Android does allow is seeing what's playing right now (the same title and artwork a phone shows on its lock screen), so Command Centre records each show as you watch it, on the Fire Stick only. That needs notification access, which the install script turns on for you.
+
+When you go back to a show, YouTube videos and Netflix episodes open directly where the app supports it. Other apps open on their own Continue Watching row, and playback resumes if the app was still running.
 
 ## Using it with the remote
 

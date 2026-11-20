@@ -39,6 +39,7 @@
     { id: "basketball/nba", name: "NBA" }
   ];
   var settings = Object.assign({
+    name: "Harry",
     hour24: false,
     city: { name: "Sydney", lat: -33.8688, lon: 151.2093 },
     iptv: null,
@@ -122,7 +123,7 @@
       ? pad(H) + '<span class="colon">:</span>' + m
       : (H % 12 || 12) + '<span class="colon">:</span>' + m + '<span class="ampm">' + (H < 12 ? "AM" : "PM") + "</span>";
     $("date").textContent = DAYS[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()];
-    $("greet").textContent = H < 5 ? "Up late" : H < 12 ? "Good morning" : H < 17 ? "Good afternoon" : "Good evening";
+    $("greet").innerHTML = settings.name ? 'Welcome back, <span class="nm">' + esc(settings.name) + "</span>" : "Welcome back";
     $("day").style.width = ((H * 60 + d.getMinutes()) / 1440 * 100).toFixed(1) + "%";
   }
   function timeStr(d) {
@@ -228,9 +229,6 @@
     html += tileHTML({ cls: "ghost", attr: 'data-settings="1"', inner: GEAR, name: "Settings" });
     $("apps").innerHTML = html;
 
-    $("feature-icon").innerHTML = iptv ? iconHTML(iptv.pkg, iptv.label) : "TV";
-    $("feature-sub").textContent = iptv ? "Open " + iptv.label : "Choose your IPTV app";
-    $("watch-em").textContent = iptv ? iptv.label : "";
   }
   function tileHTML(o) {
     return '<button class="app ' + (o.cls || "") + '" data-nav ' + o.attr + '><span class="tile">' + o.inner + '</span><span class="name">' + esc(o.name) + "</span></button>";
@@ -241,7 +239,72 @@
     var h = Math.round(m / 60); if (h < 24) return h + " h ago";
     var d = Math.round(h / 24); return d === 1 ? "yesterday" : d + " days ago";
   }
+  // ---------------------------------------------------------------- continue watching
+  var watch = [];
+  function whenLabel(t) {
+    var d = new Date(t), now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    var H = d.getHours();
+    if (t >= today) return H < 4 ? "Last night" : (H >= 18 ? "Tonight " : "Today ") + timeStr(d);
+    if (t >= today - 864e5) return H >= 17 ? "Last night" : "Yesterday";
+    if (t >= today - 6 * 864e5) return DAYS[d.getDay()];
+    return d.getDate() + " " + MON[d.getMonth()].slice(0, 3);
+  }
+  function leftLabel(w) {
+    if (!(w.dur > 0) || !(w.pos > 0)) return "";
+    var left = Math.round((w.dur - w.pos) / 60000);
+    return left <= 1 ? "Nearly finished" : left + " min left";
+  }
+  function loadWatch() {
+    try { watch = JSON.parse(B.getWatch()) || []; } catch (e) { watch = []; }
+    watch = watch.filter(function (w) { return byPkg[w.pkg]; });
+  }
+  function artHTML(w, cls) {
+    var src = ""; try { src = w.art ? B.getArt(w.art) : ""; } catch (e) {}
+    return src ? '<img alt="" src="' + src + '">' : (cls === "hero" ? '<span class="feed"></span>' : iconHTML(w.pkg, byPkg[w.pkg].label));
+  }
   function renderRecents() {
+    loadWatch();
+    var hero = $("hero"), w = watch[0];
+    hero.classList.toggle("empty", !w);
+    if (w) {
+      var app = byPkg[w.pkg];
+      hero.dataset.watchId = w.id;
+      delete hero.dataset.empty;
+      $("hero-bg").innerHTML = artHTML(w, "hero");
+      $("hero-badge").innerHTML = (icon(w.pkg) ? '<img alt="" src="' + icon(w.pkg) + '">' : '<span class="mini"></span>') + esc(app.label);
+      $("hero-title").textContent = w.title;
+      $("hero-sub").textContent = w.sub || "";
+      var pct = w.dur > 0 && w.pos > 0 ? Math.min(100, w.pos / w.dur * 100) : 0;
+      $("hero-prog-wrap").hidden = !pct;
+      $("hero-prog").style.width = pct.toFixed(1) + "%";
+      $("hero-when").textContent = [whenLabel(w.t), leftLabel(w)].filter(Boolean).join(" · ");
+      $("watch-em").textContent = "OK to resume";
+    } else {
+      delete hero.dataset.watchId;
+      var access = true; try { access = B.watchAccess(); } catch (e) {}
+      hero.dataset.empty = access ? "start" : "access";
+      $("hero-bg").innerHTML = '<span class="feed"></span>';
+      $("hero-badge").innerHTML = "";
+      $("hero-title").textContent = access ? "Nothing watched yet" : "Turn on Continue watching";
+      $("hero-sub").textContent = access ? "Start a show on Netflix, Stan, YouTube or My TV and it'll be here."
+        : "Lets Command Centre see what's playing, so it can take you back to it.";
+      $("hero-prog-wrap").hidden = true;
+      $("hero-when").textContent = "";
+      $("watch-em").textContent = "";
+    }
+
+    var more = watch.slice(1, 4);
+    if (more.length) {
+      $("earlier-h").textContent = "Earlier";
+      $("recents").innerHTML = more.map(function (x) {
+        return '<button class="rec f" data-nav data-watch-id="' + esc(x.id) + '"><span class="ic' + (x.art ? " art" : "") + '">' + artHTML(x, "row") +
+          '</span><span class="txt"><b>' + esc(x.title) + "</b><span>" + esc(byPkg[x.pkg].label + " · " + whenLabel(x.t)) + "</span></span></button>";
+      }).join("");
+      return;
+    }
+    // Nothing else watched yet: fall back to recently opened apps.
+    $("earlier-h").textContent = "Recently opened";
     var list = recents.filter(function (r) { return byPkg[r.pkg]; }).slice(0, 3);
     $("recents").innerHTML = list.length ? list.map(function (r) {
       var a = byPkg[r.pkg];
@@ -261,6 +324,7 @@
   function renderSettings() {
     document.querySelectorAll('[data-opt="hour24"] button').forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.val === String(settings.hour24))); });
     $("city").value = settings.city.name;
+    $("name").value = settings.name || "";
     var ip = settings.iptv && byPkg[settings.iptv];
     $("pick-iptv").textContent = ip ? ip.label + " · change" : "Choose app";
     $("leagues").innerHTML = LEAGUES.map(function (l) {
@@ -328,7 +392,17 @@
   function activate(el) {
     if (!el) return;
     var d = el.dataset;
-    if (d.iptv || d.watch || el.id === "feature") {
+    if (d.watchId) {
+      var w = watch.filter(function (x) { return x.id === d.watchId; })[0];
+      if (w && B.resumeWatch(w.id)) toast("Back to " + w.title); else toast("Couldn't open that. Is the app still installed?");
+      return;
+    }
+    if (el.id === "hero" && el.dataset.empty === "access") {
+      var ok = false; try { ok = B.openWatchAccess(); } catch (e) {}
+      if (!ok) toast("Run the install command on your PC again to switch this on");
+      return;
+    }
+    if (d.iptv || d.watch || el.id === "hero") {
       if (settings.iptv && byPkg[settings.iptv]) open(settings.iptv); else openLayer("picker");
       return;
     }
@@ -348,7 +422,8 @@
       if (i >= 0) settings.leagues.splice(i, 1); else settings.leagues.push(d.league);
       save(); el.setAttribute("aria-pressed", String(i < 0)); loadScores(); return;
     }
-    if (el.id === "city") return; // typing happens in the on-screen keyboard
+    if (el.id === "city" || el.id === "name") return; // typing happens in the on-screen keyboard
+    if (el.id === "name-save") { settings.name = $("name").value.trim().slice(0, 24); save(); tick(); toast(settings.name ? "Hi " + settings.name : "Name cleared"); return; }
     if (el.id === "city-save") return saveCity();
     if (el.id === "pick-iptv") return openLayer("picker");
     if (el.id === "home-setup") return B.openAccessibility();
@@ -386,6 +461,13 @@
       else { settings.pinned.push(d.pkg); toast(name + " added to the row"); }
       save(); renderApps(); el.classList.toggle("pinned", i < 0); return;
     }
+    if (!layer && d.watchId) {
+      var gone = watch.filter(function (x) { return x.id === d.watchId; })[0];
+      try { B.removeWatch(d.watchId); } catch (e) {}
+      renderRecents(); focusEl($("hero"));
+      toast((gone ? gone.title : "Show") + " removed from Continue watching");
+      return;
+    }
     if (!layer && d.pin != null) {
       actionPin = +d.pin; $("actions-title").textContent = byPkg[settings.pinned[actionPin]].label;
       return openLayer("actions");
@@ -404,7 +486,7 @@
     var k = e.key, code = e.keyCode;
     var inInput = document.activeElement && document.activeElement.tagName === "INPUT";
     if (inInput && (k === "ArrowLeft" || k === "ArrowRight")) return;
-    if (inInput && k === "Enter") { e.preventDefault(); saveCity(); return; }
+    if (inInput && k === "Enter") { e.preventDefault(); if (document.activeElement.id === "name") activate($("name-save")); else saveCity(); return; }
     var dir = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" }[k] ||
       { 19: "up", 20: "down", 21: "left", 22: "right" }[code];
     if (dir) { e.preventDefault(); move(dir); return; }
@@ -425,6 +507,8 @@
     if (!$("settings").hidden) renderSettings();
     if (!document.activeElement || document.activeElement === document.body) focusEl(firstApp());
   };
+  var watchTimer;
+  window.onWatchChanged = function () { clearTimeout(watchTimer); watchTimer = setTimeout(renderRecents, 500); };
   window.onAppsChanged = function () { icons = {}; loadApps(); renderApps(); renderRecents(); if (!$("all").hidden) renderAll(); };
 
   // ---------------------------------------------------------------- start
@@ -447,7 +531,19 @@
       openSettings: function () { toast("Preview: opens Fire TV settings"); }, openAmazonHome: function () { toast("Preview: opens Amazon home"); },
       homeServiceOn: function () { return false; },
       getSystem: function () { return JSON.stringify({ online: true, type: "wifi", mbps: 86, freeGB: 2.9, totalGB: 8 }); },
-      httpGet: function () {}, version: function () { return "preview"; }
+      httpGet: function () {}, version: function () { return "preview"; },
+      getWatch: function () {
+        var y = new Date(); y.setDate(y.getDate() - 1); y.setHours(21, 40, 0, 0);
+        return JSON.stringify([
+          { id: "n|The Bear", pkg: "preview.netflix", title: "The Bear", sub: "S3:E4 · Violet", t: +y, dur: 1800000, pos: 1020000 },
+          { id: "s|Bump", pkg: "preview.stan", title: "Bump", sub: "Season 5, Episode 2", t: +y - 864e5 * 2 },
+          { id: "t|Sports 1", pkg: "preview.tivimate", title: "Sports 1", sub: "A-League Men: Sydney FC v Melbourne Victory", t: Date.now() - 3 * 36e5 },
+          { id: "y|Video", pkg: "preview.youtube", title: "Every Goal from Round 4", sub: "A-Leagues", t: Date.now() - 864e5 * 4 }
+        ]);
+      },
+      getArt: function () { return ""; }, watchAccess: function () { return true; },
+      resumeWatch: function (id) { toast("Preview: would resume " + id.split("|")[1]); return true; },
+      openWatchAccess: function () { return false; }, removeWatch: function () {}
     };
   }
   function previewGet(url) {

@@ -33,7 +33,8 @@ button:focus, input:focus { outline: none; }
 @keyframes tickc { 50% { opacity: 0.35; } }
 .time .ampm { font: 300 1.7vw var(--f-time); color: var(--dim); letter-spacing: 0.04em; margin-left: 0.8vw; }
 .when { display: flex; flex-direction: column; gap: 0.6vw; padding-bottom: 0.3vw; }
-.when .greet { font: 400 1.3vw var(--f-ui); color: var(--dim); }
+.when .greet { font: 400 1.7vw var(--f-time); color: var(--fg); }
+.when .greet .nm { color: var(--acc); }
 .when .date { font: 300 2.2vw var(--f-time); }
 .dayline { width: 16vw; height: 0.25vw; background: var(--panel-2); border-radius: 1vw; overflow: hidden; margin-top: 0.4vw; }
 .dayline i { display: block; height: 100%; width: 0; background: var(--acc); }
@@ -56,27 +57,38 @@ button:focus, input:focus { outline: none; }
 .panel h3 em { font-style: normal; letter-spacing: 0.04em; text-transform: none; font-family: var(--f-mono); opacity: .8; }
 
 .live { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.4vw; flex: 1; min-height: 0; }
-.feature { position: relative; border-radius: 0.9vw; overflow: hidden; display: block; transition: box-shadow .15s; }
-.feature .feed { position: absolute; inset: 0; background: linear-gradient(120deg, #173a2a, #1f4d37 45%, #143224 75%, #1b4532); background-size: 300% 300%; animation: feed 10s ease-in-out infinite; }
-.feature .feed::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 0.15vw; background: #ffffff1f; }
-.feature .feed::before { content: ""; position: absolute; left: 50%; top: 50%; width: 18%; padding-top: 18%; border: 0.15vw solid #ffffff26; border-radius: 50%; transform: translate(-50%, -50%); }
+.hero { position: relative; border-radius: 0.9vw; overflow: hidden; display: block; transition: box-shadow .15s; background: #0e1311; }
+.hero-bg { position: absolute; inset: 0; }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, #0000 25%, #000000d9 100%); }
+.feed { position: absolute; inset: 0; background: linear-gradient(120deg, #173a2a, #1f4d37 45%, #143224 75%, #1b4532); background-size: 300% 300%; animation: feed 10s ease-in-out infinite; }
 @keyframes feed { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-.badge { position: absolute; top: 0.9vw; left: 0.9vw; display: flex; align-items: center; gap: 0.5vw; font: 500 0.85vw var(--f-mono); letter-spacing: 0.08em; color: var(--fg); background: #000a; padding: 0.3vw 0.7vw; border-radius: 0.5vw; }
-.dot { width: 0.6vw; height: 0.6vw; border-radius: 50%; background: var(--acc); animation: pulse 1.6s ease-in-out infinite; }
+.badge { position: absolute; z-index: 1; top: 0.9vw; left: 0.9vw; display: flex; align-items: center; gap: 0.6vw; font: 500 0.85vw var(--f-mono); letter-spacing: 0.06em; color: var(--fg); background: #000b; padding: 0.3vw 0.7vw 0.3vw 0.3vw; border-radius: 0.5vw; }
+.badge:empty { display: none; }
+.badge img, .badge .mini { width: 1.5vw; height: 1.5vw; border-radius: 0.3vw; display: block; }
+.badge .mini { background: var(--panel-2); }
+.badge .dot { width: 0.6vw; height: 0.6vw; border-radius: 50%; background: var(--acc); margin-left: 0.4vw; animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .3; } }
-.feature-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.2vw 1.3vw; display: flex; align-items: center; gap: 1.1vw; background: linear-gradient(transparent, #000b); }
-.feature-body b { display: block; font: 500 1.8vw var(--f-ui); letter-spacing: -0.01em; }
-.feature-body span span { display: block; font: 400 1vw var(--f-ui); color: #c9d2cc; margin-top: 0.2vw; }
-.feature-icon { width: 3.6vw; height: 3.6vw; border-radius: 0.8vw; overflow: hidden; flex: none; background: #ffffff14; display: grid; place-items: center; font: 600 1.2vw var(--f-ui); }
-.feature-icon img { width: 100%; height: 100%; display: block; }
-.feature:focus { box-shadow: 0 0 0 0.22vw var(--acc); }
+.hero-body { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; padding: 1.3vw 1.4vw; display: flex; flex-direction: column; gap: 0.4vw; }
+.hero-body b { font: 500 2vw/1.1 var(--f-ui); letter-spacing: -0.015em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hero-sub { font: 400 1.05vw var(--f-ui); color: #cdd5cf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-foot { display: flex; align-items: center; gap: 1vw; margin-top: 0.4vw; }
+.hero-foot .progress { flex: 1; height: 0.3vw; background: #ffffff26; border-radius: 1vw; overflow: hidden; }
+.hero-foot .progress i { display: block; height: 100%; width: 0; background: var(--acc); }
+.hero-when { font: 400 0.9vw var(--f-mono); color: #cdd5cf; white-space: nowrap; }
+.hero:focus { box-shadow: 0 0 0 0.22vw var(--acc); }
+.hero.empty .hero-body b { font-size: 1.6vw; }
 
 .recent { display: flex; flex-direction: column; gap: 0.6vw; min-width: 0; }
 .recent h4 { margin: 0; font: 400 1vw var(--f-ui); color: var(--dim); }
 .recent-list { display: flex; flex-direction: column; gap: 0.3vw; }
 .rec { display: flex; align-items: center; gap: 0.9vw; padding: 0.55vw 0.8vw; margin: 0 -0.8vw; min-width: 0; }
 .rec .ic { width: 2.4vw; height: 2.4vw; border-radius: 0.5vw; overflow: hidden; flex: none; background: var(--panel-2); display: grid; place-items: center; font: 600 0.9vw var(--f-ui); }
-.rec .ic img { width: 100%; height: 100%; display: block; }
+.rec .ic img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.rec .ic.art { width: 4.4vw; height: 2.5vw; }
+.rec .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15vw; }
+.rec .txt b { flex: none; }
+.rec .txt span { font: 400 0.85vw var(--f-ui); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rec b { font: 500 1.1vw var(--f-ui); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rec span.ago { font: 400 0.9vw var(--f-mono); color: var(--dim); white-space: nowrap; }
 .empty { font: 400 1vw var(--f-ui); color: var(--dim); line-height: 1.5; }

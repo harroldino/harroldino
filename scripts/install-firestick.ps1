@@ -46,9 +46,16 @@ else { $new = "${cur}:${svc}" }
 & $adb -s $target shell settings put secure enabled_accessibility_services $new
 & $adb -s $target shell settings put secure accessibility_enabled 1
 
+Write-Host "Turning on Continue watching..."
+$lst = "com.harroldino.home/com.harroldino.home.MediaWatcher"
+& $adb -s $target shell cmd notification allow_listener $lst 2>$null | Out-Null
+$curL = (& $adb -s $target shell settings get secure enabled_notification_listeners | Out-String).Trim()
+if (-not $curL -or $curL -eq "null") { & $adb -s $target shell settings put secure enabled_notification_listeners $lst }
+elseif ($curL -notlike "*$lst*") { & $adb -s $target shell settings put secure enabled_notification_listeners "${curL}:${lst}" }
+
 Write-Host "Opening Command Centre on the TV..."
 & $adb -s $target shell monkey -p com.harroldino.home -c android.intent.category.LEANBACK_LAUNCHER 1 | Out-Null
 
 Write-Host ""
-Write-Host "Done. Command Centre is installed and the Home button now opens it." -ForegroundColor Green
+Write-Host "Done. Command Centre is installed, opens when the Fire Stick starts, and Continue watching is on." -ForegroundColor Green
 Write-Host "To update later, just run this script again."

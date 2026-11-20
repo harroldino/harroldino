@@ -3,6 +3,8 @@ package com.harroldino.home;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.session.MediaController;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -24,6 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -226,6 +229,123 @@ public class Bridge {
                 });
             }
         }).start();
+    }
+
+    // ------------------------------------------------------------------ continue watching
+
+    /** What's been played recently, newest first, as a JSON array (see MediaWatcher). */
+    @JavascriptInterface
+    public String getWatch() {
+        return act.getSharedPreferences(MediaWatcher.PREFS, Activity.MODE_PRIVATE).getString(MediaWatcher.KEY, "[]");
+    }
+
+    /** Saved artwork for a show as a JPEG data URL, or "". Only reads files MediaWatcher saved. */
+    @JavascriptInterface
+    public String getArt(String path) {
+        if (path == null || path.isEmpty()) return "";
+        synchronized (iconCache) {
+            String c = iconCache.get("art:" + path);
+            if (c != null) return c;
+        }
+        String out = "";
+        try {
+            File f = new File(path);
+            File dir = new File(act.getFilesDir(), "art");
+            if (f.getCanonicalPath().startsWith(dir.getCanonicalPath()) && f.exists()) {
+                java.io.FileInputStream in = new java.io.FileInputStream(f);
+                byte[] b = new byte[(int) f.length()];
+                int off = 0, n;
+                while (off < b.length && (n = in.read(b, off, b.length - off)) > 0) off += n;
+                in.close();
+                out = "data:image/jpeg;base64," + Base64.encodeToString(b, Base64.NO_WRAP);
+            }
+        } catch (Exception ignored) {
+        }
+        synchronized (iconCache) {
+            iconCache.put("art:" + path, out);
+        }
+        return out;
+    }
+
+    /** True when Command Centre is allowed to see what's playing. */
+    @JavascriptInterface
+    public boolean watchAccess() {
+        try {
+            String s = Settings.Secure.getString(act.getContentResolver(), "enabled_notification_listeners");
+            return s != null && s.contains(act.getPackageName() + "/");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public boolean openWatchAccess() {
+        return start(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    /** Removes one show from the list. */
+    @JavascriptInterface
+    public void removeWatch(String id) {
+        try {
+            SharedPreferences sp = act.getSharedPreferences(MediaWatcher.PREFS, Activity.MODE_PRIVATE);
+            JSONArray old = new JSONArray(sp.getString(MediaWatcher.KEY, "[]")), out = new JSONArray();
+            for (int i = 0; i < old.length(); i++) if (!id.equals(old.getJSONObject(i).optString("id"))) out.put(old.get(i));
+            sp.edit().putString(MediaWatcher.KEY, out.toString()).apply();
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Goes back to a show: opens the exact video/episode where the app supports a link to it,
+     * otherwise opens the app, then presses play if that app's player is still running.
+     */
+    @JavascriptInterface
+    public boolean resumeWatch(String id) {
+        JSONObject item = null;
+        try {
+            JSONArray arr = new JSONArray(getWatch());
+            for (int i = 0; i < arr.length(); i++) if (id.equals(arr.getJSONObject(i).optString("id"))) item = arr.getJSONObject(i);
+        } catch (Exception ignored) {
+        }
+        if (item == null) return false;
+        final String pkg = item.optString("pkg");
+        String mediaId = item.optString("mediaId", "");
+
+        boolean opened = false;
+        String link = deepLink(pkg, mediaId);
+        if (link != null) {
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+            i.setPackage(pkg);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (pkg.contains("netflix")) i.putExtra("source", "30");
+            opened = start(i);
+        }
+        if (!opened) opened = launch(pkg);
+        if (!opened) return false;
+
+        final MediaController live;
+        synchronized (MediaWatcher.live) {
+            live = MediaWatcher.live.get(pkg);
+        }
+        if (live != null && link == null) {
+            web.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        live.getTransportControls().play();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }, 2500);
+        }
+        return true;
+    }
+
+    private static String deepLink(String pkg, String mediaId) {
+        if (mediaId == null || mediaId.isEmpty()) return null;
+        if (pkg.contains("youtube") && mediaId.matches("[A-Za-z0-9_-]{11}")) return "https://www.youtube.com/watch?v=" + mediaId;
+        if (pkg.contains("netflix") && mediaId.matches("\\d{5,12}")) return "https://www.netflix.com/watch/" + mediaId;
+        return null;
     }
 
     @JavascriptInterface

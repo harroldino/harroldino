@@ -30,18 +30,19 @@
 
     <div class="mid">
       <section class="panel">
-        <h3>Watch <em id="watch-em"></em></h3>
+        <h3>Continue watching <em id="watch-em"></em></h3>
         <div class="live">
-          <button class="feature" id="feature" data-nav>
-            <span class="feed"></span>
-            <span class="badge"><span class="dot"></span>LIVE TV</span>
-            <span class="feature-body">
-              <span class="feature-icon" id="feature-icon"></span>
-              <span><b>My TV</b><span id="feature-sub">Choose your IPTV app</span></span>
+          <button class="hero" id="hero" data-nav>
+            <span class="hero-bg" id="hero-bg"><span class="feed"></span></span>
+            <span class="badge" id="hero-badge"></span>
+            <span class="hero-body">
+              <b id="hero-title">Loading…</b>
+              <span class="hero-sub" id="hero-sub"></span>
+              <span class="hero-foot"><span class="progress" id="hero-prog-wrap"><i id="hero-prog"></i></span><span class="hero-when" id="hero-when"></span></span>
             </span>
           </button>
           <div class="recent">
-            <h4>Recently opened</h4>
+            <h4 id="earlier-h">Earlier</h4>
             <div class="recent-list" id="recents"></div>
           </div>
         </div>
@@ -58,7 +59,7 @@
 
   <!-- All apps -->
   <div class="layer" id="all" hidden>
-    <div class="layer-head"><h2>All apps</h2><span>OK opens · Menu ☰ pins or unpins · Back closes</span></div>
+    <div class="layer-head"><h2>All apps</h2><span>OK opens · Menu ☰ adds to or removes from the row · Back closes</span></div>
     <div class="grid" id="all-grid"></div>
   </div>
 
@@ -72,6 +73,12 @@
   <div class="layer sheet" id="settings" hidden>
     <div class="layer-head"><h2>Settings</h2><span id="version"></span></div>
     <div class="rows">
+      <div class="row"><span class="lab">Your name</span>
+        <div class="seg">
+          <input id="name" data-nav type="text" autocomplete="off" spellcheck="false" placeholder="Your name">
+          <button data-nav id="name-save">Save</button>
+        </div>
+      </div>
       <div class="row"><span class="lab">Clock</span>
         <div class="seg" data-opt="hour24">
           <button data-nav data-val="false">12-hour</button>
