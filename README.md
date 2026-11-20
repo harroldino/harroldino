@@ -58,7 +58,7 @@ Fire OS doesn't let you choose a different home screen. Command Centre gets arou
 1. In Command Centre, press Menu ☰, go to **Home button** and choose **Set up**.
 2. Turn on **Command Centre Home button**.
 
-Now the Home button takes you to Command Centre. To use Amazon's home screen briefly (for profiles or Amazon's own settings), use **Settings → Amazon home for 5 min**.
+Now the Home button takes you to Command Centre, and the Fire Stick opens straight into Command Centre when it's switched on. Amazon's home screen may flash for a moment during start-up, because Fire OS always starts it first. To use Amazon's home screen briefly (for profiles or Amazon's own settings), use **Settings → Amazon home for 5 min**.
 
 Amazon sometimes changes how the Home button works in Fire OS updates. If it stops redirecting, check that the service is still on. As a fallback, the free *Button Mapper* app can map Home to Command Centre.
 

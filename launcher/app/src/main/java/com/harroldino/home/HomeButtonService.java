@@ -1,6 +1,7 @@
 package com.harroldino.home;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Context;
 import android.content.Intent;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -18,6 +19,23 @@ public class HomeButtonService extends AccessibilityService {
         pausedUntil = System.currentTimeMillis() + millis;
     }
 
+    static void openCommandCentre(Context context) {
+        Intent i = new Intent(context, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        try {
+            context.startActivity(i);
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** The system starts this service during boot, so this also covers switching the Fire Stick on. */
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        if (System.currentTimeMillis() < pausedUntil) return;
+        openCommandCentre(this);
+    }
+
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event == null || event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
@@ -25,12 +43,7 @@ public class HomeButtonService extends AccessibilityService {
         if (pkg == null || !AMAZON_HOME.contentEquals(pkg)) return;
         if (System.currentTimeMillis() < pausedUntil) return;
 
-        Intent i = new Intent(this, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        try {
-            startActivity(i);
-        } catch (Exception ignored) {
-        }
+        openCommandCentre(this);
     }
 
     @Override
