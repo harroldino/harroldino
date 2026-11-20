@@ -179,6 +179,7 @@
     $("spot-toggle").setAttribute("aria-label", has && spot.playing ? "Pause" : "Play");
     $("spot-open").textContent = app ? "Open Spotify" : "Get Spotify";
     tickSpotify();
+    syncAwake();
   }
   function tickSpotify() {
     var show = !!spot.title && spot.dur > 0;
@@ -191,18 +192,61 @@
   function spotify(act) {
     var app = spotifyApp();
     if (act === "open") { if (app) open(app.pkg); else B.openStore("Spotify"); return; }
+    if (act === "sleep") return cycleSleep();
+    var wasIdle = !spot.title;
     var ok = false; try { ok = B.spotifyControl(act); } catch (e) {}
-    if (!ok) {
-      if (!app) return toast("Spotify isn't installed. Choose Get Spotify.");
-      open(app.pkg); toast("Opening Spotify. Pick something to play.");
-      return;
-    }
-    if (act === "toggle" && spot.title) {
+    if (!ok) return toast("Spotify isn't installed. Choose Get Spotify.");
+    if (wasIdle) {
+      // Spotify wasn't running: it was told to resume in the background. If nothing starts, open it.
+      toast("Starting Spotify…");
+      setTimeout(function () {
+        loadSpotify();
+        if (!spot.title && app) { open(app.pkg); toast("Pick something in Spotify, then press Home to come back"); }
+      }, 4000);
+    } else if (act === "toggle") {
       // Flip straight away so the button feels instant; the real state follows from Spotify.
       spot.pos = Math.min(spot.dur || 0, spot.pos + (spot.playing ? Date.now() - spotAt : 0)); spotAt = Date.now();
       spot.playing = !spot.playing; renderSpotify();
     }
     setTimeout(loadSpotify, 500); setTimeout(loadSpotify, 1600);
+  }
+
+  // Keep the TV awake while music plays, so the song stays on screen instead of the screensaver.
+  var awake = null;
+  function syncAwake() {
+    var want = !!(spot.title && spot.playing);
+    if (want === awake) return;
+    awake = want; try { B.keepAwake(want); } catch (e) {}
+  }
+
+  // Sleep timer: pauses Spotify after the chosen time, then lets the TV go to sleep as normal.
+  var SLEEP_STEPS = [0, 15, 30, 45, 60, 90];
+  var MOON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
+  var sleepAt = 0, sleepStep = 0;
+  function cycleSleep() {
+    sleepStep = (sleepStep + 1) % SLEEP_STEPS.length;
+    var m = SLEEP_STEPS[sleepStep];
+    sleepAt = m ? Date.now() + m * 60000 : 0;
+    toast(m ? "Music stops in " + m + " min" : "Sleep timer off");
+    renderSleep();
+  }
+  function renderSleep() {
+    var left = sleepAt ? Math.max(0, sleepAt - Date.now()) : 0;
+    var b = $("spot-sleep");
+    b.classList.toggle("on", !!sleepAt);
+    b.innerHTML = MOON + "<span>" + (sleepAt ? Math.ceil(left / 60000) + "m" : "Off") + "</span>";
+    b.setAttribute("aria-label", sleepAt ? "Sleep timer, " + Math.ceil(left / 60000) + " minutes left" : "Sleep timer off");
+  }
+  function checkSleep() {
+    if (!sleepAt) return;
+    if (Date.now() >= sleepAt) {
+      sleepAt = 0; sleepStep = 0;
+      try { B.spotifyControl("pause"); } catch (e) {}
+      spot.playing = false; renderSpotify();
+      toast("Sleep timer: music paused. Night!");
+      setTimeout(loadSpotify, 1000);
+    }
+    renderSleep();
   }
 
   // ---------------------------------------------------------------- system line
@@ -328,12 +372,20 @@
     $("name").value = settings.name || "";
     var ip = settings.iptv && byPkg[settings.iptv];
     $("pick-iptv").textContent = ip ? ip.label + " · change" : "Choose app";
+    renderVolume();
     var on = false; try { on = B.homeServiceOn(); } catch (e) {}
     $("home-state").textContent = on ? "On" : "Off";
     $("home-state").className = "state" + (on ? " on" : "");
     $("home-setup").textContent = on ? "Accessibility settings" : "Set up";
     $("home-hint").hidden = on;
     try { $("version").textContent = "Version " + B.version(); } catch (e) {}
+  }
+
+  function renderVolume() {
+    var v = {}; try { v = JSON.parse(B.getVolume()) || {}; } catch (e) {}
+    var fixed = !!v.fixed || !(v.max > 0);
+    $("vol-down").hidden = $("vol-up").hidden = fixed;
+    $("vol-state").textContent = fixed ? "Set by your TV" : Math.round(v.v / v.max * 100) + "%";
   }
 
   // ---------------------------------------------------------------- layers
@@ -364,7 +416,7 @@
   function focusEl(el) {
     if (!el) return;
     try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
-    if (el.closest(".grid")) { try { el.scrollIntoView({ block: "nearest" }); } catch (e) {} }
+    if (el.closest(".grid") || el.closest(".rows")) { try { el.scrollIntoView({ block: "nearest" }); } catch (e) {} }
   }
   function firstApp() { return $("apps").querySelector(".app"); }
   function move(dir) {
@@ -422,6 +474,8 @@
     if (el.id === "pick-iptv") return openLayer("picker");
     if (el.id === "home-setup") return B.openAccessibility();
     if (el.id === "fire-settings") return B.openSettings();
+    if (d.sys) { var hit = false; try { hit = B.openSystem(d.sys); } catch (e) {} if (!hit) toast("Opened Fire TV settings. Find " + el.textContent + " there."); return; }
+    if (el.id === "vol-up" || el.id === "vol-down") { try { B.stepVolume(el.id === "vol-up" ? 1 : -1); } catch (e) {} setTimeout(renderVolume, 150); return; }
     if (el.id === "amazon-home") return B.openAmazonHome(5);
     if (el.id === "reset-apps") { settings.pinned = defaultPins(); save(); renderApps(); toast("App row reset"); }
   }
@@ -512,8 +566,8 @@
   tick(); setInterval(tick, 1000);
   setInterval(renderRecents, 60000);
   loadWeather(); setInterval(loadWeather, 20 * 60000);
-  $("spot-prev").innerHTML = PREV; $("spot-next").innerHTML = NEXT;
-  loadSpotify(); setInterval(tickSpotify, 1000); setInterval(loadSpotify, 10000);
+  $("spot-prev").innerHTML = PREV; $("spot-next").innerHTML = NEXT; renderSleep();
+  loadSpotify(); setInterval(function () { tickSpotify(); checkSleep(); }, 1000); setInterval(loadSpotify, 10000);
   loadSystem(); setInterval(loadSystem, 60000);
   setTimeout(function () { focusEl(firstApp()); }, 50);
 
@@ -525,7 +579,7 @@
       { title: "Northern Lights", artist: "Mara Vale", album: "Static Bloom", dur: 187000 },
       { title: "Back Roads", artist: "Copper Hills", album: "Dust & Daylight", dur: 241000 }
     ];
-    var t0 = PREVIEW_TRACKS[0];
+    var t0 = PREVIEW_TRACKS[0], previewVol = 9;
     var previewSpot = { base: t0, title: t0.title, artist: t0.artist, album: t0.album, dur: t0.dur, pos: 62000, playing: true, at: Date.now(), art: "" };
     return {
       getApps: function () { return JSON.stringify(list.map(function (l) { return { pkg: "preview." + l.toLowerCase().replace(/\W/g, ""), label: l }; })); },
@@ -548,6 +602,10 @@
       getArt: function () { return ""; }, watchAccess: function () { return true; },
       resumeWatch: function (id) { toast("Preview: would resume " + id.split("|")[1]); return true; },
       openWatchAccess: function () { return false; }, removeWatch: function () {},
+      keepAwake: function () {},
+      getVolume: function () { return JSON.stringify({ v: previewVol, max: 15, fixed: false }); },
+      stepVolume: function (d) { previewVol = Math.max(0, Math.min(15, previewVol + d)); },
+      openSystem: function (k) { toast("Preview: opens Fire TV " + k + " settings"); return true; },
       getSpotify: function () {
         if (!previewSpot.title) return "{}";
         var s = { title: previewSpot.title, artist: previewSpot.artist, album: previewSpot.album, dur: previewSpot.dur, pos: previewSpot.pos, playing: previewSpot.playing, art: "" };

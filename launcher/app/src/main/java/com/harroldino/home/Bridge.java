@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.media.MediaMetadata;
+import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.os.SystemClock;
@@ -414,15 +417,50 @@ public class Bridge {
         return o.toString();
     }
 
-    /** Sends play/pause ("toggle"), "next" or "prev" to Spotify. False if Spotify has no session to control. */
+    /** Spotify's package on this device, or null if it isn't installed. */
+    private String spotifyPkg() {
+        PackageManager pm = act.getPackageManager();
+        for (String p : new String[]{"com.spotify.tv.android", "com.spotify.music"}) {
+            try {
+                pm.getPackageInfo(p, 0);
+                return p;
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sends play/pause ("toggle"), "pause", "next" or "prev" to Spotify.
+     * If Spotify isn't running yet, a Play press is sent straight to it so it resumes your music in the
+     * background while Command Centre stays on screen. False if Spotify isn't installed.
+     */
     @JavascriptInterface
     public boolean spotifyControl(String action) {
         MediaController c = spotifySession();
-        if (c == null) return false;
+        if (c == null) {
+            if ("pause".equals(action)) return true;
+            String pkg = spotifyPkg();
+            if (pkg == null) return false;
+            int code = "next".equals(action) ? KeyEvent.KEYCODE_MEDIA_NEXT
+                    : "prev".equals(action) ? KeyEvent.KEYCODE_MEDIA_PREVIOUS : KeyEvent.KEYCODE_MEDIA_PLAY;
+            try {
+                for (int a : new int[]{KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP}) {
+                    Intent i = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    i.setPackage(pkg);
+                    i.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(a, code));
+                    act.sendBroadcast(i);
+                }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
         try {
             MediaController.TransportControls t = c.getTransportControls();
             if ("next".equals(action)) t.skipToNext();
             else if ("prev".equals(action)) t.skipToPrevious();
+            else if ("pause".equals(action)) t.pause();
             else {
                 PlaybackState ps = c.getPlaybackState();
                 int st = ps == null ? PlaybackState.STATE_NONE : ps.getState();
@@ -433,6 +471,76 @@ public class Bridge {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** Keeps the TV from dropping to the screensaver while music is playing, so the song stays on screen. */
+    @JavascriptInterface
+    public void keepAwake(final boolean on) {
+        act.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (on) act.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else act.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------ fire tv settings
+
+    /** Media volume as JSON {v, max, fixed}. "fixed" means the TV or soundbar controls volume, not the Stick. */
+    @JavascriptInterface
+    public String getVolume() {
+        JSONObject o = new JSONObject();
+        try {
+            AudioManager am = (AudioManager) act.getSystemService(Activity.AUDIO_SERVICE);
+            o.put("v", am.getStreamVolume(AudioManager.STREAM_MUSIC));
+            o.put("max", am.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+            o.put("fixed", am.isVolumeFixed());
+        } catch (Exception ignored) {
+        }
+        return o.toString();
+    }
+
+    /** Volume up (+1) or down (-1), showing Fire OS's own volume bar. */
+    @JavascriptInterface
+    public void stepVolume(int dir) {
+        try {
+            AudioManager am = (AudioManager) act.getSystemService(Activity.AUDIO_SERVICE);
+            am.adjustStreamVolume(AudioManager.STREAM_MUSIC, dir > 0 ? AudioManager.ADJUST_RAISE : AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Opens one page of Fire TV settings. Each page has a few intents to try, because Fire OS versions
+     * differ; if none of them exist the main settings screen opens and this returns false.
+     */
+    @JavascriptInterface
+    public boolean openSystem(String key) {
+        String[] tries;
+        switch (key == null ? "" : key) {
+            case "network": tries = new String[]{Settings.ACTION_WIFI_SETTINGS, Settings.ACTION_WIRELESS_SETTINGS}; break;
+            case "display": tries = new String[]{Settings.ACTION_DISPLAY_SETTINGS}; break;
+            case "sound": tries = new String[]{Settings.ACTION_SOUND_SETTINGS}; break;
+            case "screensaver": tries = new String[]{Settings.ACTION_DREAM_SETTINGS, Settings.ACTION_DISPLAY_SETTINGS}; break;
+            case "bluetooth": tries = new String[]{Settings.ACTION_BLUETOOTH_SETTINGS}; break;
+            case "apps": tries = new String[]{Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS, Settings.ACTION_APPLICATION_SETTINGS}; break;
+            case "accessibility": tries = new String[]{Settings.ACTION_ACCESSIBILITY_SETTINGS}; break;
+            case "date": tries = new String[]{Settings.ACTION_DATE_SETTINGS}; break;
+            case "language": tries = new String[]{Settings.ACTION_LOCALE_SETTINGS}; break;
+            case "privacy": tries = new String[]{Settings.ACTION_PRIVACY_SETTINGS}; break;
+            case "storage": tries = new String[]{Settings.ACTION_INTERNAL_STORAGE_SETTINGS, Settings.ACTION_MEMORY_CARD_SETTINGS}; break;
+            case "about": tries = new String[]{Settings.ACTION_DEVICE_INFO_SETTINGS}; break;
+            case "developer": tries = new String[]{Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS}; break;
+            default: tries = new String[0];
+        }
+        PackageManager pm = act.getPackageManager();
+        for (String a : tries) {
+            Intent i = new Intent(a).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (i.resolveActivity(pm) != null && start(i)) return true;
+        }
+        start(new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        return tries.length == 0;
     }
 
     private static String toJpegUrl(Bitmap bmp, int maxSide) {

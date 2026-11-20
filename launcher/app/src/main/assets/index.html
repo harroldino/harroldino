@@ -62,6 +62,7 @@
           <button class="ctl" data-nav data-spot="prev" aria-label="Previous track" id="spot-prev"></button>
           <button class="ctl play" data-nav data-spot="toggle" aria-label="Play" id="spot-toggle"></button>
           <button class="ctl" data-nav data-spot="next" aria-label="Next track" id="spot-next"></button>
+          <button class="ctl sleep" data-nav data-spot="sleep" id="spot-sleep" aria-label="Sleep timer"></button>
           <button class="ctl open" data-nav data-spot="open" id="spot-open">Open Spotify</button>
         </div>
       </section>
@@ -107,6 +108,31 @@
       <div class="row"><span class="lab">My TV opens</span>
         <div class="seg"><button data-nav id="pick-iptv">Choose app</button></div>
       </div>
+      <div class="row"><span class="lab">Volume</span>
+        <div class="seg">
+          <button data-nav id="vol-down" aria-label="Volume down">−</button>
+          <span class="state" id="vol-state"></span>
+          <button data-nav id="vol-up" aria-label="Volume up">+</button>
+        </div>
+      </div>
+      <div class="row"><span class="lab">Fire TV</span>
+        <div class="seg" id="sys-links">
+          <button data-nav data-sys="network">Wi-Fi &amp; network</button>
+          <button data-nav data-sys="display">Display</button>
+          <button data-nav data-sys="sound">Sound</button>
+          <button data-nav data-sys="screensaver">Screensaver</button>
+          <button data-nav data-sys="bluetooth">Remotes &amp; Bluetooth</button>
+          <button data-nav data-sys="apps">Applications</button>
+          <button data-nav data-sys="storage">Storage</button>
+          <button data-nav data-sys="accessibility">Accessibility</button>
+          <button data-nav data-sys="date">Date &amp; time</button>
+          <button data-nav data-sys="language">Language</button>
+          <button data-nav data-sys="privacy">Privacy</button>
+          <button data-nav data-sys="about">About this Fire TV</button>
+          <button data-nav data-sys="developer">Developer options</button>
+          <button data-nav id="fire-settings">All Fire TV settings</button>
+        </div>
+      </div>
       <div class="row"><span class="lab">Home button</span>
         <div class="seg">
           <span class="state" id="home-state"></span>
@@ -115,7 +141,6 @@
       </div>
       <div class="row"><span class="lab">More</span>
         <div class="seg">
-          <button data-nav id="fire-settings">Fire TV settings</button>
           <button data-nav id="amazon-home">Amazon home for 5 min</button>
           <button data-nav id="reset-apps">Reset app row</button>
         </div>
