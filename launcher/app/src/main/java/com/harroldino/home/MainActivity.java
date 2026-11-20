@@ -58,6 +58,12 @@ public class MainActivity extends Activity {
                 js("window.onWatchChanged && window.onWatchChanged()");
             }
         };
+        MediaWatcher.onMedia = new Runnable() {
+            @Override
+            public void run() {
+                js("window.onMediaChanged && window.onMediaChanged()");
+            }
+        };
         setContentView(web);
         web.loadUrl("file:///android_asset/index.html");
         web.requestFocus();
@@ -125,6 +131,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         MediaWatcher.onChange = null;
+        MediaWatcher.onMedia = null;
         try {
             unregisterReceiver(packageReceiver);
         } catch (Exception ignored) {

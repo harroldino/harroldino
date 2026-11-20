@@ -48,9 +48,22 @@
         </div>
       </section>
 
-      <section class="panel">
-        <h3>Scores <em id="scores-em"></em></h3>
-        <div class="scores" id="scores"><div class="empty">Loading scores…</div></div>
+      <section class="panel spot" id="spot">
+        <h3>Spotify <em id="spot-em"></em></h3>
+        <div class="np">
+          <div class="np-art" id="spot-art"><span class="feed"></span></div>
+          <div class="np-meta">
+            <b id="spot-title">Nothing playing</b>
+            <span class="np-artist" id="spot-artist"></span>
+            <div class="np-bar" id="spot-bar" hidden><span class="progress"><i id="spot-prog"></i></span><span class="np-time" id="spot-time"></span></div>
+          </div>
+        </div>
+        <div class="np-ctl">
+          <button class="ctl" data-nav data-spot="prev" aria-label="Previous track" id="spot-prev"></button>
+          <button class="ctl play" data-nav data-spot="toggle" aria-label="Play" id="spot-toggle"></button>
+          <button class="ctl" data-nav data-spot="next" aria-label="Next track" id="spot-next"></button>
+          <button class="ctl open" data-nav data-spot="open" id="spot-open">Open Spotify</button>
+        </div>
       </section>
     </div>
 
@@ -93,9 +106,6 @@
       </div>
       <div class="row"><span class="lab">My TV opens</span>
         <div class="seg"><button data-nav id="pick-iptv">Choose app</button></div>
-      </div>
-      <div class="row"><span class="lab">Scores from</span>
-        <div class="seg" id="leagues"></div>
       </div>
       <div class="row"><span class="lab">Home button</span>
         <div class="seg">

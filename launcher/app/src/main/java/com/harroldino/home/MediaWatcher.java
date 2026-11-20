@@ -34,6 +34,18 @@ public class MediaWatcher extends NotificationListenerService {
     /** Live sessions by package, so a click can resume playback in an app that is still running. */
     static final Map<String, MediaController> live = new HashMap<>();
     static volatile Runnable onChange;
+    /** Fired on every play/pause/track change of any session, for the live Spotify panel. */
+    static volatile Runnable onMedia;
+
+    /** Music apps get their own panel, so they're kept out of the Continue watching list. */
+    static boolean isMusic(String pkg) {
+        return pkg != null && pkg.contains("spotify");
+    }
+
+    private static void mediaChanged() {
+        Runnable r = onMedia;
+        if (r != null) r.run();
+    }
 
     private MediaSessionManager msm;
     private final Map<String, MediaController.Callback> callbacks = new HashMap<>();
@@ -83,11 +95,13 @@ public class MediaWatcher extends NotificationListenerService {
                 MediaController.Callback cb = new MediaController.Callback() {
                     @Override
                     public void onMetadataChanged(MediaMetadata metadata) {
+                        mediaChanged();
                         record(c, true);
                     }
 
                     @Override
                     public void onPlaybackStateChanged(PlaybackState state) {
+                        mediaChanged();
                         record(c, false);
                     }
                 };
@@ -96,9 +110,11 @@ public class MediaWatcher extends NotificationListenerService {
                 record(c, true);
             }
         }
+        mediaChanged();
     }
 
     private void record(MediaController c, boolean force) {
+        if (isMusic(c.getPackageName())) return;
         try {
             MediaMetadata m = c.getMetadata();
             PlaybackState ps = c.getPlaybackState();

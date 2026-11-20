@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaMetadata;
 import android.media.session.MediaController;
+import android.media.session.PlaybackState;
+import android.os.SystemClock;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -346,6 +349,103 @@ public class Bridge {
         if (pkg.contains("youtube") && mediaId.matches("[A-Za-z0-9_-]{11}")) return "https://www.youtube.com/watch?v=" + mediaId;
         if (pkg.contains("netflix") && mediaId.matches("\\d{5,12}")) return "https://www.netflix.com/watch/" + mediaId;
         return null;
+    }
+
+    // ------------------------------------------------------------------ spotify
+
+    private String spotArtKey = null, spotArtUrl = "";
+
+    private static MediaController spotifySession() {
+        synchronized (MediaWatcher.live) {
+            for (Map.Entry<String, MediaController> e : MediaWatcher.live.entrySet()) {
+                if (MediaWatcher.isMusic(e.getKey())) return e.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * What Spotify is playing, as JSON {title, artist, album, art, dur, pos, playing}.
+     * Empty object when Spotify has no media session (not running, or nothing queued).
+     */
+    @JavascriptInterface
+    public String getSpotify() {
+        JSONObject o = new JSONObject();
+        try {
+            MediaController c = spotifySession();
+            MediaMetadata m = c == null ? null : c.getMetadata();
+            if (m == null) return o.toString();
+            String title = m.getString(MediaMetadata.METADATA_KEY_TITLE);
+            if (title == null || title.trim().isEmpty()) title = m.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
+            if (title == null || title.trim().isEmpty()) return o.toString();
+            String artist = m.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            if (artist == null) artist = m.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE);
+            o.put("title", title.trim());
+            o.put("artist", artist == null ? "" : artist.trim());
+            String album = m.getString(MediaMetadata.METADATA_KEY_ALBUM);
+            o.put("album", album == null ? "" : album.trim());
+            o.put("dur", Math.max(0, m.getLong(MediaMetadata.METADATA_KEY_DURATION)));
+
+            PlaybackState ps = c.getPlaybackState();
+            boolean playing = false;
+            long pos = 0;
+            if (ps != null) {
+                int st = ps.getState();
+                playing = st == PlaybackState.STATE_PLAYING || st == PlaybackState.STATE_BUFFERING;
+                pos = ps.getPosition();
+                if (st == PlaybackState.STATE_PLAYING && ps.getLastPositionUpdateTime() > 0) {
+                    pos += (long) ((SystemClock.elapsedRealtime() - ps.getLastPositionUpdateTime()) * ps.getPlaybackSpeed());
+                }
+            }
+            o.put("playing", playing);
+            o.put("pos", Math.max(0, pos));
+
+            String key = title + "|" + artist + "|" + album;
+            if (!key.equals(spotArtKey)) {
+                spotArtKey = key;
+                Bitmap art = m.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+                if (art == null) art = m.getBitmap(MediaMetadata.METADATA_KEY_ART);
+                if (art == null) art = m.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON);
+                spotArtUrl = toJpegUrl(art, 320);
+            }
+            o.put("art", spotArtUrl);
+        } catch (Exception ignored) {
+        }
+        return o.toString();
+    }
+
+    /** Sends play/pause ("toggle"), "next" or "prev" to Spotify. False if Spotify has no session to control. */
+    @JavascriptInterface
+    public boolean spotifyControl(String action) {
+        MediaController c = spotifySession();
+        if (c == null) return false;
+        try {
+            MediaController.TransportControls t = c.getTransportControls();
+            if ("next".equals(action)) t.skipToNext();
+            else if ("prev".equals(action)) t.skipToPrevious();
+            else {
+                PlaybackState ps = c.getPlaybackState();
+                int st = ps == null ? PlaybackState.STATE_NONE : ps.getState();
+                if (st == PlaybackState.STATE_PLAYING || st == PlaybackState.STATE_BUFFERING) t.pause();
+                else t.play();
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static String toJpegUrl(Bitmap bmp, int maxSide) {
+        if (bmp == null) return "";
+        try {
+            float k = Math.min(1f, maxSide / (float) Math.max(bmp.getWidth(), bmp.getHeight()));
+            Bitmap s = k < 1f ? Bitmap.createScaledBitmap(bmp, Math.max(1, Math.round(bmp.getWidth() * k)), Math.max(1, Math.round(bmp.getHeight() * k)), true) : bmp;
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            s.compress(Bitmap.CompressFormat.JPEG, 85, bos);
+            return "data:image/jpeg;base64," + Base64.encodeToString(bos.toByteArray(), Base64.NO_WRAP);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     @JavascriptInterface

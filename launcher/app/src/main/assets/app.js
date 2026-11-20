@@ -30,21 +30,12 @@
     get: function (k, d) { try { var v = localStorage.getItem("cc." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set: function (k, v) { try { localStorage.setItem("cc." + k, JSON.stringify(v)); } catch (e) {} }
   };
-  var LEAGUES = [
-    { id: "soccer/aus.1", name: "A-League Men" },
-    { id: "soccer/aus.w.1", name: "A-League Women" },
-    { id: "australian-football/afl", name: "AFL" },
-    { id: "rugby-league/3", name: "NRL" },
-    { id: "soccer/eng.1", name: "Premier League" },
-    { id: "basketball/nba", name: "NBA" }
-  ];
   var settings = Object.assign({
     name: "Harry",
     hour24: false,
     city: { name: "Sydney", lat: -33.8688, lon: 151.2093 },
     iptv: null,
-    pinned: null,
-    leagues: ["soccer/aus.1", "australian-football/afl", "rugby-league/3"]
+    pinned: null
   }, store.get("settings", {}));
   function save() { store.set("settings", settings); }
   var recents = store.get("recents", []);
@@ -159,49 +150,59 @@
     });
   }
 
-  // ---------------------------------------------------------------- scores (ESPN public scoreboards)
-  var scoreTimer;
-  function loadScores() {
-    clearTimeout(scoreTimer);
-    var leagues = LEAGUES.filter(function (l) { return settings.leagues.indexOf(l.id) >= 0; });
-    $("scores-em").textContent = leagues.map(function (l) { return l.name; }).join(" · ");
-    if (!leagues.length) { $("scores").innerHTML = '<div class="empty">No leagues picked. Press Menu ☰ to choose some in Settings.</div>'; return; }
-    Promise.all(leagues.map(function (l) {
-      return getJSON("https://site.api.espn.com/apis/site/v2/sports/" + l.id + "/scoreboard")
-        .then(function (j) { return (j.events || []).map(function (e) { return toMatch(e, l.name); }).filter(Boolean); })
-        .catch(function () { return null; });
-    })).then(function (lists) {
-      var failed = lists.every(function (x) { return x === null; });
-      var all = [].concat.apply([], lists.filter(Boolean));
-      var rank = { "in": 0, pre: 1, post: 2 };
-      all.sort(function (a, b) {
-        if (rank[a.state] !== rank[b.state]) return rank[a.state] - rank[b.state];
-        return a.state === "post" ? b.date - a.date : a.date - b.date;
-      });
-      var top = all.slice(0, 4);
-      if (failed) $("scores").innerHTML = '<div class="empty">Scores unavailable right now.</div>';
-      else if (!top.length) $("scores").innerHTML = '<div class="empty">No matches this week for your leagues.</div>';
-      else $("scores").innerHTML = top.map(function (s) {
-        return '<button class="score f" data-nav data-watch="1"><span class="comp">' + esc(s.comp) + '</span><span class="st' + (s.state === "in" ? " live" : "") + '">' + esc(s.status) +
-          '</span><span class="teams">' + esc(s.teams) + '</span><span class="res">' + esc(s.res) + "</span></button>";
-      }).join("");
-      var anyLive = top.some(function (s) { return s.state === "in"; });
-      scoreTimer = setTimeout(loadScores, anyLive ? 60000 : 15 * 60000);
-    });
+  // ---------------------------------------------------------------- spotify (read from its media session, no login)
+  var PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
+  var PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="3.8" height="14" rx="1"/><rect x="13.7" y="5" width="3.8" height="14" rx="1"/></svg>';
+  var PREV = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 6v12l-8.5-6z"/><rect x="5.5" y="6" width="2.4" height="12" rx="0.8"/></svg>';
+  var NEXT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6v12l8.5-6z"/><rect x="16.1" y="6" width="2.4" height="12" rx="0.8"/></svg>';
+  var spot = {}, spotAt = 0, shownArt = null;
+  function spotifyApp() { return apps.filter(function (a) { return /spotify/i.test(a.label) || /spotify/.test(a.pkg); })[0]; }
+  function mmss(ms) { var s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ":" + pad(s % 60); }
+  function loadSpotify() {
+    try { spot = JSON.parse(B.getSpotify()) || {}; } catch (e) { spot = {}; }
+    spotAt = Date.now();
+    renderSpotify();
   }
-  function toMatch(e, comp) {
-    try {
-      var c = e.competitions[0], st = e.status.type;
-      var home = c.competitors.filter(function (x) { return x.homeAway === "home"; })[0] || c.competitors[0];
-      var away = c.competitors.filter(function (x) { return x.homeAway === "away"; })[0] || c.competitors[1];
-      var nm = function (t) { return t.team.shortDisplayName || t.team.abbreviation || t.team.displayName; };
-      var date = new Date(e.date);
-      var status, res;
-      if (st.state === "in") { status = "LIVE " + (e.status.displayClock && e.status.displayClock !== "0'" ? e.status.displayClock : (st.shortDetail || "")); res = home.score + "–" + away.score; }
-      else if (st.state === "post") { status = st.shortDetail || "FT"; res = home.score + "–" + away.score; }
-      else { status = DAYS[date.getDay()].slice(0, 3).toUpperCase() + " " + timeStr(date).toUpperCase(); res = "—"; }
-      return { comp: comp, state: st.state, status: status.trim(), teams: nm(home) + " v " + nm(away), res: res, date: +date };
-    } catch (err) { return null; }
+  function renderSpotify() {
+    var has = !!spot.title, app = spotifyApp();
+    $("spot").classList.toggle("playing", has && !!spot.playing);
+    $("spot-em").textContent = has ? (spot.playing ? "Playing" : "Paused") : "";
+    $("spot-title").textContent = has ? spot.title : (app ? "Nothing playing" : "Spotify isn't installed");
+    $("spot-artist").textContent = has ? [spot.artist, spot.album].filter(Boolean).join(" · ")
+      : (app ? "Press play to pick up where you left off." : "Choose Get Spotify to install it.");
+    var src = has && spot.art ? spot.art : "";
+    if (src !== shownArt) {
+      shownArt = src;
+      $("spot-art").innerHTML = src ? '<img alt="" src="' + src + '">' : '<span class="feed"></span>';
+    }
+    $("spot-toggle").innerHTML = has && spot.playing ? PAUSE : PLAY;
+    $("spot-toggle").setAttribute("aria-label", has && spot.playing ? "Pause" : "Play");
+    $("spot-open").textContent = app ? "Open Spotify" : "Get Spotify";
+    tickSpotify();
+  }
+  function tickSpotify() {
+    var show = !!spot.title && spot.dur > 0;
+    $("spot-bar").hidden = !show;
+    if (!show) return;
+    var pos = Math.min(spot.dur, spot.pos + (spot.playing ? Date.now() - spotAt : 0));
+    $("spot-prog").style.width = (pos / spot.dur * 100).toFixed(2) + "%";
+    $("spot-time").textContent = mmss(pos) + " / " + mmss(spot.dur);
+  }
+  function spotify(act) {
+    var app = spotifyApp();
+    if (act === "open") { if (app) open(app.pkg); else B.openStore("Spotify"); return; }
+    var ok = false; try { ok = B.spotifyControl(act); } catch (e) {}
+    if (!ok) {
+      if (!app) return toast("Spotify isn't installed. Choose Get Spotify.");
+      open(app.pkg); toast("Opening Spotify. Pick something to play.");
+      return;
+    }
+    if (act === "toggle" && spot.title) {
+      // Flip straight away so the button feels instant; the real state follows from Spotify.
+      spot.pos = Math.min(spot.dur || 0, spot.pos + (spot.playing ? Date.now() - spotAt : 0)); spotAt = Date.now();
+      spot.playing = !spot.playing; renderSpotify();
+    }
+    setTimeout(loadSpotify, 500); setTimeout(loadSpotify, 1600);
   }
 
   // ---------------------------------------------------------------- system line
@@ -327,9 +328,6 @@
     $("name").value = settings.name || "";
     var ip = settings.iptv && byPkg[settings.iptv];
     $("pick-iptv").textContent = ip ? ip.label + " · change" : "Choose app";
-    $("leagues").innerHTML = LEAGUES.map(function (l) {
-      return '<button data-nav data-league="' + l.id + '" aria-pressed="' + (settings.leagues.indexOf(l.id) >= 0) + '">' + esc(l.name) + "</button>";
-    }).join("");
     var on = false; try { on = B.homeServiceOn(); } catch (e) {}
     $("home-state").textContent = on ? "On" : "Off";
     $("home-state").className = "state" + (on ? " on" : "");
@@ -392,6 +390,7 @@
   function activate(el) {
     if (!el) return;
     var d = el.dataset;
+    if (d.spot) return spotify(d.spot);
     if (d.watchId) {
       var w = watch.filter(function (x) { return x.id === d.watchId; })[0];
       if (w && B.resumeWatch(w.id)) toast("Back to " + w.title); else toast("Couldn't open that. Is the app still installed?");
@@ -417,11 +416,6 @@
     if (el.id === "wx") return toast(wxDays.length ? wxDays.join("   ·   ") : "Weather is still loading");
     if (d.act) return doAction(d.act);
     if (d.val && el.parentNode.dataset.opt === "hour24") { settings.hour24 = d.val === "true"; save(); tick(); renderSettings(); return; }
-    if (d.league) {
-      var i = settings.leagues.indexOf(d.league);
-      if (i >= 0) settings.leagues.splice(i, 1); else settings.leagues.push(d.league);
-      save(); el.setAttribute("aria-pressed", String(i < 0)); loadScores(); return;
-    }
     if (el.id === "city" || el.id === "name") return; // typing happens in the on-screen keyboard
     if (el.id === "name-save") { settings.name = $("name").value.trim().slice(0, 24); save(); tick(); toast(settings.name ? "Hi " + settings.name : "Name cleared"); return; }
     if (el.id === "city-save") return saveCity();
@@ -503,26 +497,36 @@
   window.onMenu = menu;
   window.onHome = function () { closeAllLayers(); focusEl(firstApp()); };
   window.onResume = function () {
-    loadSystem(); renderRecents();
+    loadSystem(); renderRecents(); loadSpotify();
     if (!$("settings").hidden) renderSettings();
     if (!document.activeElement || document.activeElement === document.body) focusEl(firstApp());
   };
   var watchTimer;
   window.onWatchChanged = function () { clearTimeout(watchTimer); watchTimer = setTimeout(renderRecents, 500); };
-  window.onAppsChanged = function () { icons = {}; loadApps(); renderApps(); renderRecents(); if (!$("all").hidden) renderAll(); };
+  window.onAppsChanged = function () { icons = {}; loadApps(); renderApps(); renderRecents(); renderSpotify(); if (!$("all").hidden) renderAll(); };
+  var mediaTimer;
+  window.onMediaChanged = function () { clearTimeout(mediaTimer); mediaTimer = setTimeout(loadSpotify, 150); };
 
   // ---------------------------------------------------------------- start
   loadApps(); renderApps(); renderRecents();
   tick(); setInterval(tick, 1000);
   setInterval(renderRecents, 60000);
   loadWeather(); setInterval(loadWeather, 20 * 60000);
-  loadScores();
+  $("spot-prev").innerHTML = PREV; $("spot-next").innerHTML = NEXT;
+  loadSpotify(); setInterval(tickSpotify, 1000); setInterval(loadSpotify, 10000);
   loadSystem(); setInterval(loadSystem, 60000);
   setTimeout(function () { focusEl(firstApp()); }, 50);
 
   // ---------------------------------------------------------------- browser preview only
   function makePreviewBridge() {
     var list = ["Netflix", "YouTube", "Stan", "ABC iview", "SBS On Demand", "7plus", "9Now", "Spotify", "TiviMate", "Prime Video", "Downloader", "Disney+", "Plex", "Silk Browser", "Kayo Sports", "10 Play"];
+    var PREVIEW_TRACKS = [
+      { title: "Sunday Drive", artist: "The Lazy Kites", album: "Coastline", dur: 214000 },
+      { title: "Northern Lights", artist: "Mara Vale", album: "Static Bloom", dur: 187000 },
+      { title: "Back Roads", artist: "Copper Hills", album: "Dust & Daylight", dur: 241000 }
+    ];
+    var t0 = PREVIEW_TRACKS[0];
+    var previewSpot = { base: t0, title: t0.title, artist: t0.artist, album: t0.album, dur: t0.dur, pos: 62000, playing: true, at: Date.now(), art: "" };
     return {
       getApps: function () { return JSON.stringify(list.map(function (l) { return { pkg: "preview." + l.toLowerCase().replace(/\W/g, ""), label: l }; })); },
       getIcon: function () { return ""; },
@@ -543,17 +547,25 @@
       },
       getArt: function () { return ""; }, watchAccess: function () { return true; },
       resumeWatch: function (id) { toast("Preview: would resume " + id.split("|")[1]); return true; },
-      openWatchAccess: function () { return false; }, removeWatch: function () {}
+      openWatchAccess: function () { return false; }, removeWatch: function () {},
+      getSpotify: function () {
+        if (!previewSpot.title) return "{}";
+        var s = { title: previewSpot.title, artist: previewSpot.artist, album: previewSpot.album, dur: previewSpot.dur, pos: previewSpot.pos, playing: previewSpot.playing, art: "" };
+        if (s.playing) s.pos += Date.now() - previewSpot.at;
+        return JSON.stringify(s);
+      },
+      spotifyControl: function (a) {
+        var p = previewSpot, now = Date.now();
+        if (p.playing) p.pos += now - p.at; p.at = now;
+        if (a === "toggle") p.playing = !p.playing;
+        else { var i = (PREVIEW_TRACKS.indexOf(p.base) + (a === "next" ? 1 : PREVIEW_TRACKS.length - 1)) % PREVIEW_TRACKS.length; p.base = PREVIEW_TRACKS[i]; p.title = p.base.title; p.artist = p.base.artist; p.album = p.base.album; p.dur = p.base.dur; p.pos = 0; }
+        return true;
+      }
     };
   }
   function previewGet(url) {
     if (url.indexOf("open-meteo.com/v1/forecast") >= 0) return Promise.resolve({ current: { temperature_2m: 24, weather_code: 0 }, daily: { time: ["2026-11-19", "2026-11-20", "2026-11-21", "2026-11-22"], temperature_2m_max: [25, 27, 29, 22], temperature_2m_min: [18, 19, 20, 17], weather_code: [0, 1, 2, 61] } });
     if (url.indexOf("geocoding") >= 0) return Promise.resolve({ results: [{ name: "Melbourne", admin1: "Victoria", latitude: -37.81, longitude: 144.96 }] });
-    if (url.indexOf("aus.1/") >= 0) return Promise.resolve({ events: [
-      { date: new Date().toISOString(), status: { displayClock: "63'", type: { state: "in", shortDetail: "63'" } }, competitions: [{ competitors: [{ homeAway: "home", score: "1", team: { shortDisplayName: "Sydney FC" } }, { homeAway: "away", score: "0", team: { shortDisplayName: "Melb Victory" } }] }] }] });
-    if (url.indexOf("rugby-league") >= 0) return Promise.resolve({ events: [
-      { date: new Date(Date.now() - 864e5).toISOString(), status: { type: { state: "post", shortDetail: "FT" } }, competitions: [{ competitors: [{ homeAway: "home", score: "22", team: { shortDisplayName: "Roosters" } }, { homeAway: "away", score: "18", team: { shortDisplayName: "Broncos" } }] }] }] });
-    if (url.indexOf("afl") >= 0) return Promise.resolve({ events: [] });
     return Promise.reject(new Error("preview"));
   }
 })();
