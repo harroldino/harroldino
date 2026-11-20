@@ -1,7 +1,7 @@
 # Installs Command Centre on a Fire TV Stick from a Windows PC, over Wi-Fi (ADB).
 # Before running: on the Fire Stick turn on Settings > My Fire TV > Developer options > ADB debugging.
 # The PC and the Fire Stick must be on the same network.
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $ProgressPreference = "SilentlyContinue"
 
 Write-Host ""
@@ -14,12 +14,12 @@ New-Item -ItemType Directory -Force $dir | Out-Null
 Set-Location $dir
 
 Write-Host "Downloading Android platform tools (adb)..."
-Invoke-WebRequest "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile "platform-tools.zip"
+Invoke-WebRequest -ErrorAction Stop "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile "platform-tools.zip"
 Expand-Archive "platform-tools.zip" -DestinationPath . -Force
 $adb = Join-Path $dir "platform-tools\adb.exe"
 
 Write-Host "Downloading the latest Command Centre build..."
-Invoke-WebRequest "https://github.com/harroldino/harroldino/releases/latest/download/command-centre.apk" -OutFile "command-centre.apk"
+Invoke-WebRequest -ErrorAction Stop "https://github.com/harroldino/harroldino/releases/latest/download/command-centre.apk" -OutFile "command-centre.apk"
 
 Write-Host "Connecting to $target ..."
 & $adb connect $target | Write-Host
@@ -28,10 +28,10 @@ Write-Host "Look at the TV. If it asks 'Allow USB debugging?', tick 'Always allo
 Read-Host "Then press Enter here"
 & $adb connect $target | Write-Host
 
-$state = (& $adb -s $target get-state 2>&1 | Out-String).Trim()
+$state = (& $adb -s $target get-state 2>$null | Out-String).Trim()
 if ($state -ne "device") {
-    Write-Host "Couldn't connect ($state). Check the IP address, that ADB debugging is on, and that you allowed this PC on the TV, then run this again." -ForegroundColor Red
-    exit 1
+    Write-Host "Couldn't connect to the Fire Stick. Check the IP address, that ADB debugging is on, and that you allowed this PC on the TV, then run this again." -ForegroundColor Red
+    return
 }
 
 Write-Host "Installing Command Centre..."
