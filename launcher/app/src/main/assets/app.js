@@ -54,7 +54,7 @@
     /netflix/i, /^youtube$|^youtube \(|youtube for/i, /^stan\b/i, /iview/i, /\bsbs\b/i,
     /7plus/i, /9now/i, /10 ?play/i, /spotify/i, /disney/i
   ];
-  var IPTV_HINT = /tivimate|smarters|ott navigator|sparkle|iptv|xciptv|purple|televizo|perfect player/i;
+  var IPTV_HINT = /^my tv$|tivimate|smarters|ott navigator|sparkle|iptv|xciptv|purple|televizo|perfect player/i;
 
   var apps = [], byPkg = {}, icons = {};
   function loadApps() {

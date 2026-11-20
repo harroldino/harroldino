@@ -3,6 +3,7 @@
 A custom home screen for an Amazon Fire TV Stick. It shows a big clock, the weather, live scores, your IPTV app and your other apps (Netflix, YouTube, Stan, ABC iview, SBS and so on), and none of Amazon's ads.
 
 - `launcher/` is the Android app that you install on the Fire Stick.
+- `iptv/` is **My TV**, the IPTV app that the My TV tile opens (early days, see below).
 - `mockups/` holds the design mockups it was built from.
 
 ## What it does
@@ -65,6 +66,26 @@ Amazon sometimes changes how the Home button works in Fire OS updates. If it sto
 ### Updates
 
 Every change pushed to `launcher/` builds a new APK in GitHub Actions and publishes it as the latest release. To update, run the same Downloader link again and install over the top. Your settings are kept.
+
+## My TV (the IPTV app)
+
+My TV plays your IPTV provider's channels. It's at an early stage: it plays an M3U playlist full screen and you change channels with the remote. The designs being considered are in `mockups/iptv-concepts.html`.
+
+| Button | What happens |
+| --- | --- |
+| Up / Down | Previous / next channel |
+| Left | Back to the channel you were just on |
+| Right | Show what's on this channel |
+| OK (centre) | Channel list |
+| Number keys | Type a channel number |
+| Menu ☰ | Set the playlist link |
+
+The first time it opens, it asks for your playlist link. Use the M3U link from your provider. For an Xtream Codes login, the link looks like `http://host:port/get.php?username=USER&password=PASS&type=m3u_plus&output=ts`. My TV remembers the last channel and opens straight into it next time.
+
+To install it, use Downloader with:
+`https://github.com/harroldino/harroldino/releases/download/mytv/my-tv.apk`
+
+Command Centre picks My TV for the **My TV** tile automatically if you haven't chosen another app. To build it yourself: `gradle -p iptv assembleRelease`.
 
 ## Building it yourself
 

@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My TV Concepts</title>
+<style>
+:root{
+  --bg:#f4f2ee; --card:#ffffff; --ink:#1b1c1f; --muted:#62656d; --line:#e2dfd8; --accent:#ff6a3d; --chip:#f0ece5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0e0f12; --card:#17191d; --ink:#eceae6; --muted:#9a9ca3; --line:#2a2d33; --accent:#ff8a5c; --chip:#22252b; }
+}
+:root[data-theme="dark"]{ --bg:#0e0f12; --card:#17191d; --ink:#eceae6; --muted:#9a9ca3; --line:#2a2d33; --accent:#ff8a5c; --chip:#22252b; }
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:24px 16px 64px}
+.wrap{max-width:980px;margin:0 auto}
+header.top{margin-bottom:28px}
+header.top h1{font-size:clamp(26px,6vw,40px);line-height:1.1;letter-spacing:-.02em}
+header.top p{color:var(--muted);margin-top:8px;max-width:60ch}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+nav.toc a{font-size:13px;text-decoration:none;color:var(--ink);background:var(--chip);border-radius:99px;padding:5px 11px}
+.concept{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:22px}
+.concept h2{font-size:20px;display:flex;gap:10px;align-items:baseline}
+.concept h2 .n{color:var(--accent);font-variant-numeric:tabular-nums;font-size:15px}
+.concept .pitch{color:var(--muted);margin:4px 0 14px}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 18px;margin-top:14px;list-style:none}
+.feat li{font-size:14px;padding-left:16px;position:relative}
+.feat li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tags span{font-size:12px;background:var(--chip);border-radius:6px;padding:2px 8px;color:var(--muted)}
+
+/* ---------- TV frame: everything inside scales with its width ---------- */
+.tv{container-type:inline-size;aspect-ratio:16/9;border-radius:10px;overflow:hidden;position:relative;background:#000;color:#fff;box-shadow:0 0 0 6px #111,0 10px 30px rgba(0,0,0,.25)}
+.tv .s{position:absolute;inset:0;font-size:1.55cqw;line-height:1.3;font-family:system-ui,sans-serif}
+.abs{position:absolute}
+.row{display:flex}
+.b{font-weight:700}
+.dim{opacity:.6}
+.foc{outline:.3cqw solid #fff;outline-offset:.15cqw;box-shadow:0 0 2cqw rgba(255,255,255,.35)}
+
+/* ---------- scene "images" (drawn, no external files) ---------- */
+.sc{background-size:cover;background-position:center}
+.pitch{background:
+  radial-gradient(circle at 50% 50%,transparent 9%,rgba(255,255,255,.55) 9.4%,transparent 10%),
+  linear-gradient(90deg,transparent 49.6%,rgba(255,255,255,.55) 49.6% 50.4%,transparent 50.4%),
+  repeating-linear-gradient(90deg,#2e8b3e 0 8%,#277a35 8% 16%)}
+.court{background:
+  radial-gradient(ellipse at 50% 120%,transparent 30%,rgba(255,255,255,.5) 30.5%,transparent 31.5%),
+  linear-gradient(180deg,#1a1d33 0 18%,#c98a4a 18%),
+  repeating-linear-gradient(90deg,#c98a4a 0 3%,#bd7f42 3% 6%)}
+.oval{background:
+  radial-gradient(ellipse at 50% 55%,#3f9a4a 0 38%,#2f7b38 38.5% 60%,#c9b28a 60.5% 63%,#2a2d3a 63.5%)}
+.news{background:
+  radial-gradient(circle at 50% 46%,#e9c7a8 0 7%,transparent 7.3%),
+  radial-gradient(ellipse at 50% 80%,#24324d 0 22%,transparent 22.5%),
+  linear-gradient(180deg,#0b3a7a,#0a2350 60%,#e23a3a 60% 66%,#0a1a33 66%)}
+.film{background:
+  radial-gradient(circle at 70% 58%,#ffd98a 0 6%,transparent 6.5%),
+  linear-gradient(180deg,transparent 62%,#1a0f2b 62%),
+  linear-gradient(180deg,#2b1055,#d1456b 45%,#ffb36b 62%)}
+.nature{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%236fb3df'/%3E%3Cstop offset='1' stop-color='%23e7f3f9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='160' height='90' fill='url(%23s)'/%3E%3Ccircle cx='122' cy='22' r='7' fill='%23fff6d0'/%3E%3Cpath d='M0 62 L28 30 L44 46 L70 18 L100 52 L120 36 L160 60 V90 H0Z' fill='%237d93a8'/%3E%3Cpath d='M70 18 L62 27 L70 25 L76 28Z M28 30 L22 37 L30 35Z' fill='%23fff'/%3E%3Cpath d='M0 72 Q40 52 80 66 T160 64 V90 H0Z' fill='%233b7a4e'/%3E%3Cpath d='M0 82 Q50 70 100 80 T160 78 V90 H0Z' fill='%23255a37'/%3E%3C/svg%3E") center/cover}
+.city{background:
+  repeating-linear-gradient(90deg,#141a2b 0 6%,#1c2440 6% 9%,#0f1424 9% 15%) bottom/100% 55% no-repeat,
+  radial-gradient(circle at 20% 25%,#fff7c2 0 2%,transparent 2.5%),
+  linear-gradient(180deg,#0b1030,#3a2a6b)}
+.toon{background:
+  radial-gradient(circle at 35% 55%,#ffe14d 0 12%,transparent 12.5%),
+  radial-gradient(circle at 65% 60%,#ff7ab8 0 10%,transparent 10.5%),
+  radial-gradient(circle at 80% 22%,#fff 0 6%,transparent 6.5%),
+  linear-gradient(180deg,#5ad1ff,#a3ecff 70%,#7ddc6a 70%)}
+.cook{background:
+  radial-gradient(circle at 50% 60%,#f2f2f2 0 18%,#d8d8d8 18.5% 20%,transparent 20.5%),
+  radial-gradient(circle at 45% 57%,#e05a2b 0 6%,transparent 6.5%),
+  radial-gradient(circle at 56% 63%,#7cbf4a 0 5%,transparent 5.5%),
+  linear-gradient(180deg,#6b4a32,#3a2618)}
+.space{background:
+  radial-gradient(circle at 70% 40%,#ffb26b 0 10%,#c45a2a 10.5% 13%,transparent 13.5%),
+  radial-gradient(circle at 20% 70%,#fff 0 .4%,transparent .6%),
+  radial-gradient(circle at 40% 20%,#fff 0 .4%,transparent .6%),
+  radial-gradient(circle at 85% 80%,#fff 0 .4%,transparent .6%),
+  linear-gradient(180deg,#05060f,#1b1240)}
+.race{background:
+  linear-gradient(170deg,transparent 48%,#e3e3e3 48% 50%,#3a3a3a 50% 70%,#e3e3e3 70% 72%,#2f8a3a 72%),
+  linear-gradient(180deg,#9fd3f5,#2f8a3a 48%)}
+
+/* ---------- shared bits ---------- */
+.logo{display:inline-grid;place-items:center;border-radius:.6cqw;font-weight:800;letter-spacing:-.02em;color:#fff}
+.bar{height:.45cqw;background:rgba(255,255,255,.25);border-radius:1cqw;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff}
+.live{background:#e5322d;color:#fff;font-weight:800;font-size:.85em;padding:.1cqw .6cqw;border-radius:.4cqw;letter-spacing:.05em}
+.shade-b{background:linear-gradient(0deg,rgba(0,0,0,.92),rgba(0,0,0,.6) 45%,transparent)}
+.shade-l{background:linear-gradient(90deg,rgba(0,0,0,.95),rgba(0,0,0,.7) 45%,transparent 75%)}
+
+/* 1 guide */
+.g-grid{left:0;right:0;bottom:0;top:42%;background:#0d1118;font-size:1.35cqw}
+.g-row{display:grid;grid-template-columns:16cqw 1fr;height:calc(100%/6);border-top:1px solid #1d2430}
+.g-ch{display:flex;align-items:center;gap:.8cqw;padding:0 1cqw;background:#121824}
+.g-pr{position:relative}
+.g-pr span{position:absolute;top:8%;bottom:8%;background:#1b2332;border-radius:.4cqw;padding:.3cqw .7cqw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.g-pr span.on{background:#2a3b5a}
+.g-pr span.f{background:#ff6a3d;color:#000;font-weight:700}
+.g-now{position:absolute;top:0;bottom:0;width:.2cqw;background:#ff6a3d;z-index:2}
+
+/* 3 multiview */
+.mv{inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:.4cqw;background:#000;padding:.4cqw}
+.mv>div{position:relative;border-radius:.4cqw;overflow:hidden}
+.mv .cap{position:absolute;left:0;right:0;bottom:0;padding:.6cqw 1cqw;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);display:flex;justify-content:space-between;align-items:end}
+
+/* 5 rows */
+.tile{border-radius:.7cqw;overflow:hidden;position:relative;flex:none}
+.tile .t{position:absolute;left:.6cqw;bottom:.4cqw;font-size:1.1cqw;font-weight:700;text-shadow:0 0 .6cqw #000}
+
+/* 6 terminal */
+.term{inset:0;background:#030805;color:#3dff7a;font-family:ui-monospace,"JetBrains Mono",Menlo,monospace;padding:2.2cqw 2.6cqw;font-size:1.4cqw}
+.term .hl{background:#3dff7a;color:#000}
+
+/* 9 dial */
+.dial{position:absolute;left:50%;bottom:-62cqw;width:90cqw;height:90cqw;margin-left:-45cqw;border-radius:50%;border:.25cqw solid rgba(255,255,255,.25)}
+.dial b{position:absolute;left:50%;top:50%;transform-origin:0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>My TV: 10 ideas for the IPTV app</h1>
+  <p>Ten directions for the Fire Stick IPTV app that the <b>My TV</b> tile on Command Centre opens. Each screen is drawn at TV shape. The pictures are placeholders for live video and channel art. Pick the ones you like and we can mix them.</p>
+  <nav class="toc" id="toc"></nav>
+</header>
+
+<!-- 1 -->
+<section class="concept" id="c1" data-t="Classic guide">
+  <h2><span class="n">01</span>Classic guide</h2>
+  <p class="pitch">A cable-box TV guide done properly. Live preview top left, what's on now in the middle, the full grid underneath.</p>
+  <div class="tv"><div class="s">
+    <div class="abs sc news" style="left:2cqw;top:2.5cqw;width:30cqw;height:17cqw;border-radius:.6cqw"></div>
+    <div class="abs" style="left:34cqw;top:2.5cqw;right:3cqw">
+      <div class="row" style="gap:1cqw;align-items:center"><span class="live">LIVE</span><span class="dim">Ch 102 · News 24</span><span class="dim" style="margin-left:auto">7:42 pm</span></div>
+      <div class="b" style="font-size:2.8cqw;margin-top:.6cqw">Evening Bulletin</div>
+      <div class="dim" style="margin:.3cqw 0 1cqw">7:00 to 8:00 pm · National and world news, sport and weather</div>
+      <div class="bar" style="width:60%"><i style="width:70%"></i></div>
+      <div class="dim" style="margin-top:1cqw;font-size:1.2cqw">Next: 8:00 Hard Questions · 9:00 Late Edition</div>
+    </div>
+    <div class="abs g-grid" id="guide"></div>
+  </div></div>
+  <ul class="feat">
+    <li>7-day guide from your provider's XMLTV feed</li>
+    <li>Live preview keeps playing while you browse</li>
+    <li>Press OK on a future show to set a reminder</li>
+    <li>Type a channel number on the remote to jump</li>
+    <li>Groups from your playlist: News, Sport, Movies, Kids</li>
+    <li>Hide channels you never watch</li>
+  </ul>
+  <div class="tags"><span>Familiar</span><span>Best for big playlists</span></div>
+</section>
+
+<!-- 2 -->
+<section class="concept" id="c2" data-t="Channel surfer">
+  <h2><span class="n">02</span>Channel surfer</h2>
+  <p class="pitch">Opens straight into the last channel at full screen. Up and down change channel instantly, like old TV. Everything else stays hidden until you ask.</p>
+  <div class="tv"><div class="s">
+    <div class="abs sc film" style="inset:0"></div>
+    <div class="abs b" style="right:3cqw;top:2.5cqw;font-size:6cqw;font-variant-numeric:tabular-nums;text-shadow:0 0 2cqw rgba(0,0,0,.6)">305</div>
+    <div class="abs shade-b" style="left:0;right:0;bottom:0;height:40%"></div>
+    <div class="abs" style="left:3cqw;right:3cqw;bottom:3cqw">
+      <div class="row" style="gap:1.2cqw;align-items:center">
+        <span class="logo" style="width:6cqw;height:6cqw;background:#7b2cbf;font-size:1.8cqw">M+</span>
+        <div style="flex:1">
+          <div class="dim">Movies Plus · 8:30 to 10:45 pm</div>
+          <div class="b" style="font-size:2.6cqw">The Long Summer</div>
+          <div class="bar" style="margin-top:.6cqw"><i style="width:22%"></i></div>
+        </div>
+        <div style="text-align:right;font-size:1.2cqw" class="dim">▲ 304 Classic Films<br>▼ 306 Action Movies</div>
+      </div>
+    </div>
+  </div></div>
+  <ul class="feat">
+    <li>Starts playing in under 2 seconds</li>
+    <li>Up/Down to zap, Left to flip back to the last channel</li>
+    <li>Number pad style entry: type 3, 0, 5</li>
+    <li>Info banner fades out after 4 seconds</li>
+    <li>Pre-buffers the next channel so zapping feels instant</li>
+  </ul>
+  <div class="tags"><span>Simplest</span><span>Great for older viewers</span></div>
+</section>
+
+<!-- 3 -->
+<section class="concept" id="c3" data-t="Multiview">
+  <h2><span class="n">03</span>Multiview</h2>
+  <p class="pitch">Watch four channels at once. Sound follows whichever one is highlighted. Press OK to go full screen on it.</p>
+  <div class="tv"><div class="s">
+    <div class="abs mv">
+      <div class="sc pitch foc"><div class="cap"><span><b>Sports 1</b><br><span class="dim">Sydney v Melbourne</span></span><span>🔊 2 – 1</span></div></div>
+      <div class="sc oval"><div class="cap"><span><b>Sports 2</b><br><span class="dim">Swans v Pies · Q3</span></span><span>58 – 51</span></div></div>
+      <div class="sc news"><div class="cap"><span><b>News 24</b><br><span class="dim">Evening Bulletin</span></span><span class="live">LIVE</span></div></div>
+      <div class="sc race"><div class="cap"><span><b>Motor TV</b><br><span class="dim">Bathurst · Lap 88/161</span></span><span>P1 #97</span></div></div>
+    </div>
+  </div></div>
+  <ul class="feat">
+    <li>2, 3 or 4 screens (Fire TV Stick 4K Max handles 4)</li>
+    <li>Audio jumps to the highlighted screen</li>
+    <li>Swap any screen for another channel with Menu</li>
+    <li>Save layouts like "Saturday footy"</li>
+    <li>Falls back to 2 screens on slower sticks</li>
+  </ul>
+  <div class="tags"><span>Sport weekends</span><span>Needs a 4K stick for 4 streams</span></div>
+</section>
+
+<!-- 4 -->
+<section class="concept" id="c4" data-t="Sports hub">
+  <h2><span class="n">04</span>Sports hub</h2>
+  <p class="pitch">Built around matches, not channels. It uses the same scores feed as Command Centre and finds which of your channels is showing each game.</p>
+  <div class="tv"><div class="s" style="background:#0a0f1c">
+    <div class="abs sc court" style="left:0;top:0;right:0;height:52%"></div>
+    <div class="abs shade-l" style="left:0;top:0;right:0;height:52%"></div>
+    <div class="abs" style="left:3cqw;top:3cqw;width:46cqw">
+      <div class="row" style="gap:1cqw;align-items:center"><span class="live">LIVE</span><span class="dim">NBA · 3rd quarter · 4:12</span></div>
+      <div class="b" style="font-size:3.4cqw;margin-top:.8cqw">Lakers 88 <span class="dim">–</span> 91 Celtics</div>
+      <div class="dim" style="margin:.4cqw 0 1.2cqw">On Sports 3 (Ch 503) and Sports 3 HD</div>
+      <div class="row" style="gap:1cqw"><span class="foc" style="background:#fff;color:#000;padding:.6cqw 1.6cqw;border-radius:.6cqw;font-weight:700">▶ Watch live</span><span style="background:rgba(255,255,255,.15);padding:.6cqw 1.6cqw;border-radius:.6cqw">Score alerts</span></div>
+    </div>
+    <div class="abs" style="left:3cqw;right:0;top:56%">
+      <div class="b" style="margin-bottom:1cqw">Today · your leagues</div>
+      <div class="row" style="gap:1.2cqw" id="matches"></div>
+    </div>
+  </div></div>
+  <ul class="feat">
+    <li>Matches from A-League, AFL, NRL, EPL, NBA</li>
+    <li>"Watch live" finds the channel for you</li>
+    <li>Pop-up alert when a followed team scores</li>
+    <li>Spoiler-free mode hides scores until you watch</li>
+    <li>Upcoming games: press OK to get reminded at kick-off</li>
+  </ul>
+  <div class="tags"><span>Matches Command Centre</span><span>Unique</span></div>
+</section>
+
+<!-- 5 -->
+<section class="concept" id="c5" data-t="Streaming rows">
+  <h2><span class="n">05</span>Streaming-style rows</h2>
+  <p class="pitch">Looks like the big streaming apps. A large hero at the top and rows of live channels, movies and series from your provider's on-demand library.</p>
+  <div class="tv"><div class="s" style="background:#0b0b0f">
+    <div class="abs sc space" style="left:0;top:0;right:0;height:56%"></div>
+    <div class="abs" style="left:0;top:0;right:0;height:56%;background:linear-gradient(0deg,#0b0b0f,transparent 50%),linear-gradient(90deg,#0b0b0f 5%,transparent 60%)"></div>
+    <div class="abs row" style="left:3cqw;top:2cqw;gap:2.4cqw;font-size:1.3cqw"><b>Home</b><span class="dim">Live TV</span><span class="dim">Movies</span><span class="dim">Series</span><span class="dim">Search</span></div>
+    <div class="abs" style="left:3cqw;top:9cqw;width:40cqw">
+      <div class="dim" style="font-size:1.2cqw">MOVIE · 2025 · 2h 14m</div>
+      <div class="b" style="font-size:4cqw;line-height:1.05;margin:.4cqw 0">Red Horizon</div>
+      <div class="dim" style="font-size:1.25cqw">A stranded crew has one sunrise to get off the planet.</div>
+      <div class="row" style="gap:1cqw;margin-top:1.2cqw"><span class="foc" style="background:#fff;color:#000;padding:.5cqw 1.5cqw;border-radius:.5cqw;font-weight:700">▶ Play</span><span style="background:rgba(255,255,255,.18);padding:.5cqw 1.5cqw;border-radius:.5cqw">+ My list</span></div>
+    </div>
+    <div class="abs" style="left:3cqw;right:0;top:57%" id="rows"></div>
+  </div></div>
+  <ul class="feat">
+    <li>Live TV, Movies and Series in one place</li>
+    <li>Continue watching row picks up where you stopped</li>
+    <li>Posters and descriptions from your provider (Xtream Codes)</li>
+    <li>My list for things to watch later</li>
+    <li>Search across channels, movies and shows</li>
+  </ul>
+  <div class="tags"><span>Most polished</span><span>Needs a provider with on-demand</span></div>
+</section>
+
+<!-- 6 -->
+<section class="concept" id="c6" data-t="Command Centre terminal">
+  <h2><span class="n">06</span>Command Centre terminal</h2>
+  <p class="pitch">Matches the green terminal look of your home screen. Text-first, very fast, and you can jump anywhere by typing.</p>
+  <div class="tv"><div class="s">
+    <div class="abs term">
+      <div>&gt; mytv --group sport <span class="dim">· 48 channels · 19:42</span></div>
+      <div style="margin:1.2cqw 0;display:grid;grid-template-columns:1fr 36cqw;gap:2.4cqw">
+        <div id="termlist"></div>
+        <div>
+          <div class="sc pitch" style="aspect-ratio:16/9;border:.2cqw solid #3dff7a;filter:saturate(.4) hue-rotate(10deg)"></div>
+          <div style="margin-top:1cqw">now  : A-League · SYD 2-1 MVC</div>
+          <div>next : 21:00 Match Review</div>
+          <div class="dim">sig  : 1080p · 6.2 Mbps · 0 drops</div>
+          <div style="margin-top:1cqw">[OK] watch  [☰] fav  [◀] groups</div>
+        </div>
+      </div>
+      <div>&gt; <span class="hl">_</span></div>
+    </div>
+  </div></div>
+  <ul class="feat">
+    <li>Same fonts and colours as Command Centre</li>
+    <li>Start typing on the remote's on-screen keys to filter</li>
+    <li>Shows stream health: resolution, bitrate, dropped frames</li>
+    <li>Themes: Matrix green, Teletext, Brutal</li>
+    <li>Tiny and fast, good for the older Fire TV Stick Lite</li>
+  </ul>
+  <div class="tags"><span>On brand</span><span>Lightweight</span></div>
+</section>
+
+<!-- 7 -->
+<section class="concept" id="c7" data-t="Kids corner">
+  <h2><span class="n">07</span>Kids corner</h2>
+  <p class="pitch">A separate profile with only the channels you allow, big friendly tiles and a timer. A PIN gets you back to the grown-up view.</p>
+  <div class="tv"><div class="s" style="background:linear-gradient(160deg,#4b2bd6,#1b8fe0)">
+    <div class="abs row" style="left:3cqw;right:3cqw;top:3cqw;align-items:center;gap:1.4cqw">
+      <span style="font-size:4cqw">🦊</span><span class="b" style="font-size:3cqw">Hi Mia!</span>
+      <span style="margin-left:auto;background:rgba(255,255,255,.2);padding:.6cqw 1.4cqw;border-radius:5cqw">⏱ 35 min of TV left</span>
+    </div>
+    <div class="abs row" style="left:3cqw;right:3cqw;top:13cqw;gap:2cqw" id="kids"></div>
+    <div class="abs" style="left:3cqw;bottom:3cqw;font-size:1.3cqw" class="dim">🔒 Grown-ups: hold Menu for 3 seconds</div>
+  </div></div>
+  <ul class="feat">
+    <li>Allow-list of kids' channels only</li>
+    <li>Daily time limit with a friendly "time's up" screen</li>
+    <li>4-digit PIN to leave the profile</li>
+    <li>Bedtime: TV stops at a set time</li>
+    <li>Big tiles with pictures, no small text</li>
+  </ul>
+  <div class="tags"><span>Profiles</span><span>Can be added to any design</span></div>
+</section>
+
+<!-- 8 -->
+<section class="concept" id="c8" data-t="Catch-up">
+  <h2><span class="n">08</span>Catch-up timeline</h2>
+  <p class="pitch">For providers that offer catch-up (archive). Scroll back through the last 7 days on any channel and play shows you missed.</p>
+  <div class="tv"><div class="s" style="background:#101114">
+    <div class="abs" style="left:0;top:0;bottom:0;width:15cqw;background:#17181d;padding:3cqw 0" id="days"></div>
+    <div class="abs" style="left:17cqw;top:3cqw;right:3cqw">
+      <div class="row" style="align-items:center;gap:1.2cqw"><span class="logo" style="width:4.5cqw;height:4.5cqw;background:#0b6e4f;font-size:1.3cqw">DOC</span><span><b style="font-size:2cqw">Docs Channel</b><br><span class="dim">Saturday 15 Nov · rewind up to 7 days</span></span></div>
+      <div class="row" style="gap:1.6cqw;margin-top:2cqw" id="catch"></div>
+      <div class="abs" style="left:0;right:0;top:31cqw">
+        <div class="row dim" style="justify-content:space-between;font-size:1.1cqw"><span>6 am</span><span>12 pm</span><span>6 pm</span><span>12 am</span></div>
+        <div class="bar" style="height:.8cqw;margin-top:.5cqw;position:relative"><i style="width:62%;background:linear-gradient(90deg,#3a8dff,#7ab8ff)"></i></div>
+        <div class="dim" style="margin-top:1cqw;font-size:1.2cqw">Left and right jump an hour · Press OK to play from the start</div>
+      </div>
+    </div>
+  </div></div>
+  <ul class="feat">
+    <li>Never miss a show: play anything from the last 7 days</li>
+    <li>"Start over" on a show that's already halfway through</li>
+    <li>Pause live TV and resume later</li>
+    <li>Recently watched remembers where you stopped</li>
+    <li>Only shows the archive icon on channels that support it</li>
+  </ul>
+  <div class="tags"><span>Depends on provider</span><span>High value if supported</span></div>
+</section>
+
+<!-- 9 -->
+<section class="concept" id="c9" data-t="Zen dial">
+  <h2><span class="n">09</span>Zen dial</h2>
+  <p class="pitch">One channel at a time, picked from your favourites on a big dial. No grids or lists. Calm and very hard to get lost in.</p>
+  <div class="tv"><div class="s" style="background:#0c0d10">
+    <div class="abs sc nature" style="inset:0;opacity:.45;filter:blur(.4cqw)"></div>
+    <div class="abs" style="inset:0;background:radial-gradient(ellipse at 50% 100%,transparent,#0c0d10 70%)"></div>
+    <div class="abs" style="left:0;right:0;top:4cqw;text-align:center">
+      <div class="dim" style="letter-spacing:.3em;font-size:1.1cqw">FAVOURITES · 4 OF 12</div>
+      <div class="b" style="font-size:5cqw;letter-spacing:-.03em;margin-top:.5cqw">Nature HD</div>
+      <div class="dim">Wild Coasts · ends 8:30 pm</div>
+    </div>
+    <div class="dial" id="dial"></div>
+    <div class="abs" style="left:50%;top:27.5cqw;width:10cqw;height:10cqw;margin-left:-5cqw;border-radius:50%;background:#2c5a3c;display:grid;place-items:center;font-weight:800;font-size:2cqw;box-shadow:0 0 0 .4cqw #fff,0 0 4cqw rgba(140,198,232,.6)">NAT</div>
+    <div class="abs dim" style="left:0;right:0;bottom:2cqw;text-align:center;font-size:1.1cqw">◀ ▶ turn the dial · OK to watch</div>
+  </div></div>
+  <ul class="feat">
+    <li>Only your favourite channels, up to 12</li>
+    <li>Background shows a blurred live preview</li>
+    <li>Matches the Zen home screen mockup</li>
+    <li>Night mode: dimmer, warmer colours after 9 pm</li>
+    <li>Perfect for a bedroom or guest TV</li>
+  </ul>
+  <div class="tags"><span>Minimal</span><span>Favourites only</span></div>
+</section>
+
+<!-- 10 -->
+<section class="concept" id="c10" data-t="For you">
+  <h2><span class="n">10</span>For you</h2>
+  <p class="pitch">Learns what you watch and when. At 6 pm it puts the news first, on Saturday afternoons the footy. Your usual channels are one click away.</p>
+  <div class="tv"><div class="s" style="background:linear-gradient(180deg,#141821,#0c0e13)">
+    <div class="abs row" style="left:3cqw;right:3cqw;top:2.5cqw;align-items:center">
+      <div><div class="b" style="font-size:2.6cqw">Good evening</div><div class="dim">Saturday · 7:42 pm · usually you watch sport now</div></div>
+      <div style="margin-left:auto;background:rgba(255,255,255,.1);padding:.7cqw 1.6cqw;border-radius:5cqw">🎙 Hold mic: "Put on the footy"</div>
+    </div>
+    <div class="abs row" style="left:3cqw;right:3cqw;top:11cqw;gap:1.6cqw;height:19cqw">
+      <div class="sc oval foc" style="flex:2;border-radius:.8cqw;position:relative"><div class="abs shade-b" style="left:0;right:0;bottom:0;padding:1.2cqw;border-radius:0 0 .8cqw .8cqw"><span class="live">LIVE</span> <b style="font-size:2cqw">Swans v Pies</b><br><span class="dim">Sports 2 · your team is up by 7</span></div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:1.2cqw">
+        <div class="sc cook" style="flex:1;border-radius:.8cqw;position:relative"><div class="abs" style="left:1cqw;bottom:.6cqw"><b>Kitchen Rules</b><br><span class="dim" style="font-size:1.1cqw">Continue · 22 min left</span></div></div>
+        <div class="sc news" style="flex:1;border-radius:.8cqw;position:relative"><div class="abs" style="left:1cqw;bottom:.6cqw"><b>News 24</b><br><span class="dim" style="font-size:1.1cqw">Your 6 pm habit</span></div></div>
+      </div>
+    </div>
+    <div class="abs" style="left:3cqw;right:3cqw;top:33cqw">
+      <div class="b" style="margin-bottom:.9cqw">Your channels</div>
+      <div class="row" style="gap:1.2cqw" id="favs"></div>
+    </div>
+    <div class="abs dim" style="left:3cqw;bottom:2cqw;font-size:1.15cqw">⏰ Reminder set: The Long Summer at 8:30 pm on Movies Plus</div>
+  </div></div>
+  <ul class="feat">
+    <li>Home changes by time of day and day of week</li>
+    <li>Voice search with the Alexa remote's mic</li>
+    <li>Continue watching for on-demand shows</li>
+    <li>Reminders pop up on any app, even Netflix</li>
+    <li>Everything stays on the stick, no account needed</li>
+  </ul>
+  <div class="tags"><span>Smartest</span><span>Builds on 01 + 05</span></div>
+</section>
+
+<section class="concept">
+  <h2><span class="n">··</span>Under the hood, whichever design you pick</h2>
+  <ul class="feat">
+    <li>Works with M3U playlists and Xtream Codes logins</li>
+    <li>Guide from XMLTV (EPG) URLs</li>
+    <li>ExoPlayer (Media3): HLS, MPEG-TS, DASH, 4K</li>
+    <li>Command Centre's My TV tile opens it straight to live TV</li>
+    <li>Set up from your phone: scan a QR code, paste the playlist</li>
+    <li>Favourites, hidden channels and groups kept on the stick</li>
+    <li>Auto-retry when a stream drops</li>
+    <li>Built and released by the same GitHub Actions as the launcher</li>
+  </ul>
+</section>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  // TOC
+  document.querySelectorAll(".concept[data-t]").forEach(function(c,i){
+    var a=document.createElement("a");a.href="#"+c.id;a.textContent=(i+1)+". "+c.dataset.t;$("toc").appendChild(a);
+  });
+  // 1 guide grid
+  var chans=[["101","N24","#c8102e","News 24",[["Evening Bulletin",0,40,1],["Hard Questions",40,100]]],
+    ["102","SP1","#0a7cff","Sports 1",[["A-League: SYD v MVC",0,55,0,1],["Match Review",55,100]]],
+    ["103","M+","#7b2cbf","Movies Plus",[["Night Train",0,25],["The Long Summer",25,100]]],
+    ["104","DOC","#0b6e4f","Docs",[["Wild Coasts",0,60],["Deep Blue",60,100]]],
+    ["105","KID","#ff9f1c","Kids Zone",[["Blocky Town",0,30],["Star Pals",30,70],["Bedtime",70,100]]]];
+  var g='<div style="position:relative;height:100%"><div class="g-now" style="left:calc(16cqw + 18%)"></div>';
+  g+='<div class="g-row" style="height:calc(100%/6)"><div class="g-ch dim">Today</div><div class="g-pr dim" style="display:flex;justify-content:space-between;align-items:center;padding:0 1cqw"><span style="position:static;background:none">7:30</span><span style="position:static;background:none">8:00</span><span style="position:static;background:none">8:30</span><span style="position:static;background:none">9:00</span></div></div>';
+  chans.forEach(function(c){
+    g+='<div class="g-row"><div class="g-ch"><span class="dim">'+c[0]+'</span><span class="logo" style="width:3cqw;height:2cqw;background:'+c[2]+';font-size:.9cqw">'+c[1]+'</span></div><div class="g-pr">';
+    c[4].forEach(function(p){g+='<span class="'+(p[4]?"f":(p[3]?"on":""))+'" style="left:calc('+p[1]+'% + .2cqw);width:calc('+(p[2]-p[1])+'% - .4cqw)">'+p[0]+'</span>'});
+    g+='</div></div>';
+  });
+  $("guide").innerHTML=g+'</div>';
+  // 4 matches
+  var m=[["pitch","A-League","SYD 2 – 1 MVC","67'",1],["oval","AFL","SYD 58 – 51 COL","Q3",1],["race","Supercars","Bathurst 1000","Lap 88",1],["pitch","EPL","ARS v LIV","2:30 am",0],["oval","NRL","PEN v MEL","Sun 4 pm",0]];
+  $("matches").innerHTML=m.map(function(x){return '<div class="tile sc '+x[0]+'" style="width:17cqw;height:11cqw"><div class="abs shade-b" style="inset:0"></div><div class="abs" style="left:.8cqw;right:.8cqw;bottom:.6cqw;font-size:1.15cqw"><div class="dim">'+x[1]+(x[4]?' · <span style="color:#ff5b55;font-weight:800">'+x[3]+'</span>':' · '+x[3])+'</div><b>'+x[2]+'</b></div></div>'}).join("");
+  // 5 rows
+  var r1=["pitch","news","oval","race","cook","toon"], r2=["film","space","city","nature","film","city"];
+  var names1=["Sports 1","News 24","Sports 2","Motor TV","Food","Kids"], names2=["The Long Summer","Red Horizon","Neon Nights","Wild Coasts","Golden Hour","Night Train"];
+  function row(t,a,n,w,h,first){return '<div class="b" style="font-size:1.3cqw;margin:.6cqw 0 .6cqw">'+t+'</div><div class="row" style="gap:1cqw">'+a.map(function(s,i){return '<div class="tile sc '+s+(first&&i===0?"":"")+'" style="width:'+w+'cqw;height:'+h+'cqw"><div class="t">'+n[i]+'</div></div>'}).join("")+'</div>'}
+  $("rows").innerHTML=row("Live now",r1,names1,14.5,8.2)+row("Movies",r2,names2,14.5,8.2);
+  // 6 terminal list
+  var t=[["501","Sports 1 HD","A-League",1],["502","Sports 2 HD","AFL Q3"],["503","Sports 3","NBA 3Q"],["504","Motor TV","Bathurst"],["505","Golf Live","Round 3"],["506","Racing","Race 7"],["507","Cricket","Shield D2"],["508","Combat","Prelims"]];
+  $("termlist").innerHTML=t.map(function(x){return '<div'+(x[3]?' class="hl"':'')+'>'+(x[3]?'▶ ':'&nbsp; ')+x[0]+'  '+x[1].padEnd(12," ")+' '+x[2]+'</div>'}).join("")+'<div class="dim" style="margin-top:.6cqw">&nbsp; ... 40 more · ▼</div>';
+  // 7 kids
+  var k=[["toon","Cartoons","#ffe14d"],["space","Space Club","#9b8cff"],["nature","Animals","#7ddc6a"],["cook","Cooking","#ff9f6b"]];
+  $("kids").innerHTML=k.map(function(x,i){return '<div style="flex:1;text-align:center"><div class="sc '+x[0]+(i===0?" foc":"")+'" style="aspect-ratio:1;border-radius:3cqw;border:.6cqw solid '+x[2]+'"></div><div class="b" style="font-size:2cqw;margin-top:1cqw">'+x[1]+'</div></div>'}).join("");
+  // 8 catch-up
+  var d=["Today","Fri","Thu","Wed","Tue","Mon","Sun"];
+  $("days").innerHTML='<div class="dim" style="padding:0 2cqw;font-size:1.1cqw;margin-bottom:1cqw">REWIND</div>'+d.map(function(x,i){var on=i===0?"Sat":x;return '<div style="padding:1cqw 2cqw;'+(i===0?'background:#3a8dff;font-weight:700':'')+'">'+(i===0?"Sat 15":x)+'</div>'}).join("");
+  var c=[["nature","6:00 pm","Wild Coasts","Watched 40%"],["space","7:00 pm","Planets Up Close",""],["city","8:30 pm","Cities at Night",""]];
+  $("catch").innerHTML=c.map(function(x,i){return '<div style="flex:1"><div class="sc '+x[0]+(i===1?" foc":"")+'" style="aspect-ratio:16/9;border-radius:.7cqw;position:relative"><span class="abs" style="right:.6cqw;top:.6cqw;background:rgba(0,0,0,.6);padding:.1cqw .6cqw;border-radius:.4cqw;font-size:1cqw">↺ catch-up</span></div><div class="dim" style="font-size:1.1cqw;margin-top:.5cqw">'+x[1]+'</div><div class="b">'+x[2]+'</div>'+(x[3]?'<div class="bar" style="margin-top:.4cqw"><i style="width:40%;background:#3a8dff"></i></div>':'')+'</div>'}).join("");
+  // 9 dial
+  var dial=["N24","SP1","M+","NAT","DOC","KID","FOOD","SP2","MUS"];
+  var html="";dial.forEach(function(x,i){var a=-90+(i-3)*13;html+='<b style="transform:rotate('+a+'deg) translate(43cqw) rotate('+(-a)+'deg);margin:-1.4cqw 0 0 -2.5cqw;width:5cqw;text-align:center;font-size:1.4cqw;opacity:'+(i===3?0:.55)+'">'+x+'</b>'});
+  $("dial").innerHTML=html;
+  // 10 favs
+  var f=[["N24","#c8102e"],["SP1","#0a7cff"],["SP2","#1446a0"],["M+","#7b2cbf"],["DOC","#0b6e4f"],["KID","#ff9f1c"],["FOOD","#d35400"],["MUS","#e91e63"]];
+  $("favs").innerHTML=f.map(function(x){return '<span class="logo" style="width:9.4cqw;height:5.6cqw;background:'+x[1]+';font-size:1.6cqw;border-radius:.8cqw">'+x[0]+'</span>'}).join("");
+})();
+</script>
+</body>
+</html>
