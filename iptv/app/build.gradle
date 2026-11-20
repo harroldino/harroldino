@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.harroldino.mytv'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.harroldino.mytv'
+        minSdk 22          // Fire OS 5 and newer
+        targetSdk 34
+        def buildNumber = System.getenv('BUILD_NUMBER') ?: '1'
+        versionCode = buildNumber.toInteger()
+        versionName = "0.1.${buildNumber}"
+    }
+
+    signingConfigs {
+        // Same committed key as the launcher so every build installs over the last one.
+        shared {
+            storeFile file('../../launcher/keystore/home.keystore')
+            storePassword 'android'
+            keyAlias 'home'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.shared
+        }
+        debug {
+            signingConfig signingConfigs.shared
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    def media3 = '1.4.1'
+    implementation "androidx.media3:media3-exoplayer:$media3"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3"
+    implementation "androidx.media3:media3-ui:$media3"
+
+    testImplementation 'junit:junit:4.13.2'
+}

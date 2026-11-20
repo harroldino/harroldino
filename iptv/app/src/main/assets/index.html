@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My TV</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="tv" id="tv">
+
+  <!-- Browse: hero on top, rows underneath -->
+  <div class="hero" id="hero">
+    <div class="hero-art" id="hero-art"></div>
+    <div class="hero-shade"></div>
+    <div class="hero-text">
+      <div class="eyebrow" id="hero-eyebrow"></div>
+      <h1 id="hero-title">My TV</h1>
+      <p class="hero-sub" id="hero-sub"></p>
+      <div class="hero-hint" id="hero-hint"></div>
+    </div>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="home">Home</button>
+    <button data-tab="live">Live TV</button>
+    <button data-tab="movies">Movies</button>
+    <button data-tab="series">Series</button>
+    <button data-tab="search">Search</button>
+  </nav>
+  <div class="clock" id="clock"></div>
+
+  <div class="rows" id="rows"><div class="rows-track" id="rows-track"></div></div>
+  <div class="status" id="status" hidden></div>
+
+  <!-- Sign in -->
+  <section class="layer login" id="login" hidden>
+    <div class="login-card">
+      <h2>Sign in to your IPTV provider</h2>
+      <p>Use the details from your provider's welcome email. You can paste the whole M3U link into Server and the username and password are filled in for you.</p>
+      <label for="f-server">Server</label>
+      <input id="f-server" data-nav type="url" autocomplete="off" spellcheck="false" placeholder="http://example.host:8080">
+      <label for="f-user">Username</label>
+      <input id="f-user" data-nav type="text" autocomplete="off" spellcheck="false">
+      <label for="f-pass">Password</label>
+      <input id="f-pass" data-nav type="text" autocomplete="off" spellcheck="false">
+      <div class="login-error" id="login-error" hidden></div>
+      <button class="btn primary" data-nav id="f-go">Sign in</button>
+    </div>
+  </section>
+
+  <!-- Movie or series details -->
+  <section class="layer details" id="details" hidden>
+    <div class="details-art" id="d-art"></div>
+    <div class="details-shade"></div>
+    <div class="details-body">
+      <div class="eyebrow" id="d-eyebrow"></div>
+      <h2 id="d-title"></h2>
+      <p class="d-meta" id="d-meta"></p>
+      <p class="d-plot" id="d-plot"></p>
+      <div class="d-actions" id="d-actions"></div>
+      <div class="d-episodes" id="d-episodes"></div>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <section class="layer search" id="search" hidden>
+    <div class="search-bar">
+      <input id="q" data-nav type="search" autocomplete="off" spellcheck="false" placeholder="Search channels, movies and series">
+    </div>
+    <div class="search-note" id="search-note"></div>
+    <div class="search-results" id="search-results"></div>
+  </section>
+
+  <!-- Menu -->
+  <section class="layer menu" id="menu" hidden>
+    <div class="menu-card">
+      <h2>My TV</h2>
+      <p id="menu-account"></p>
+      <button class="btn" data-nav id="m-reload">Reload channels</button>
+      <button class="btn" data-nav id="m-signout">Sign out</button>
+      <button class="btn" data-nav id="m-close">Close</button>
+      <p class="menu-version" id="menu-version"></p>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" hidden></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

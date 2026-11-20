@@ -3,6 +3,7 @@
 A custom home screen for an Amazon Fire TV Stick. It shows a big clock, the weather, live scores, your IPTV app and your other apps (Netflix, YouTube, Stan, ABC iview, SBS and so on), and none of Amazon's ads.
 
 - `launcher/` is the Android app that you install on the Fire Stick.
+- `iptv/` is **My TV**, the IPTV app that the My TV tile opens (early days, see below).
 - `mockups/` holds the design mockups it was built from.
 
 ## What it does
@@ -71,6 +72,37 @@ Amazon sometimes changes how the Home button works in Fire OS updates. If it sto
 ### Updates
 
 Every change pushed to `launcher/` builds a new APK in GitHub Actions and publishes it as the latest release. To update, run the same Downloader link again and install over the top. Your settings are kept.
+
+## My TV (the IPTV app)
+
+My TV is the IPTV app that the **My TV** tile opens. It looks like the big streaming apps: a large picture of whatever is selected at the top, and rows of live channels, movies and series underneath (design 05 in `mockups/iptv-concepts.html`).
+
+- **Home** shows what you were part-way through, your list, then live channels, movies and series. Australian categories come first.
+- **Live TV**, **Movies** and **Series** have a row for every category your provider has.
+- **Movies and series** open a details page with the plot, **Play** or **Resume**, and **+ My list**. Series list every episode by season, and the next episode starts by itself.
+- **Search** finds channels, movies and series by name.
+- When you open the app it checks your subscription and tells you if it has ended.
+
+**Signing in.** The first time it opens, enter the server, username and password from your provider's welcome email. You can paste the whole M3U link into Server instead and the username and password are filled in from it. A plain M3U playlist link also works, but then you only get live channels. Your login is kept only on the Fire Stick.
+
+| Button | In the rows | While watching live TV | While watching a movie or episode |
+| --- | --- | --- | --- |
+| Arrows | Move around | Up/Down change channel, Left goes back to the last channel | Show the seek bar and skip |
+| OK | Watch, or open details | Channel list | Pause or play |
+| Number keys | | Type a channel number | |
+| Menu ☰ | Your account, reload, sign out | | |
+| Back | Back to the top, then Home, then close | Back to the rows | Back to the rows; it remembers where you were |
+
+To install it, use Downloader with:
+`https://github.com/harroldino/harroldino/releases/download/mytv/my-tv.apk`
+
+Or install it from a Windows PC on the same Wi-Fi, which also lets you type your login on the PC keyboard. Turn on *ADB debugging* on the Fire Stick (see above), then run this in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/harroldino/harroldino/claude/optimistic-babbage-x2s8vm/scripts/install-mytv.ps1 | iex
+```
+
+The screen is HTML, CSS and JavaScript in `iptv/app/src/main/assets/`, like Command Centre. Open `index.html` in a desktop browser to preview it with made-up channels: arrow keys move, Enter selects, `m` is Menu and Esc is Back. Add `?login` to the address to see the sign-in screen. To build it yourself: `gradle -p iptv assembleRelease`.
 
 ## Building it yourself
 
